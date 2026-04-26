@@ -1,0 +1,121 @@
+{% extends "core/base.html" %}
+
+{% block title %}Results — Intramurals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Results</h1>
+    <p style="color:var(--secondary); font-size:0.9rem; margin-top:0.25rem;">Match results grouped by event and division.</p>
+  </div>
+</div>
+
+{% if event_groups %}
+
+  {% for eg in event_groups %}
+  <!-- ===== EVENT SECTION ===== -->
+  <div style="margin-bottom:2.5rem;">
+
+    <!-- Event Header -->
+    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:2px solid var(--primary);">
+      <span style="font-size:1.4rem;">
+        {% if eg.event.format == 'group_knockout' %}🏀
+        {% elif eg.event.format == 'hybrid' %}⚽
+        {% else %}🏅{% endif %}
+      </span>
+      <div>
+        <h2 style="font-size:1.25rem; font-weight:700; color:var(--text); margin:0;">{{ eg.event.name }}</h2>
+        <span class="format-badge format-{{ eg.event.format }}" style="margin-top:0.2rem; display:inline-block;">
+          {{ eg.event.get_format_display }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Divisions -->
+    {% for div_key, div_data in eg.divisions.items %}
+    <div style="margin-bottom:1.5rem;">
+
+      <!-- Division Header -->
+      <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.75rem; padding:0.35rem 0.75rem; border-radius:5px; display:inline-block;
+        {% if div_key == 'men' %}background:#e8f0fe; color:#1a56db;{% else %}background:#fce7f3; color:#9d174d;{% endif %}">
+        {% if div_key == 'men' %}♂ Men's Division{% else %}♀ Women's Division{% endif %}
+      </h3>
+
+      <!-- Stages -->
+      {% for stage_key, stage_data in div_data.stages.items %}
+      <p style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;
+                color:{{ stage_data.color }}; margin-bottom:0.4rem; margin-top:0.75rem;">
+        {{ stage_data.label }}
+      </p>
+      <div class="table-wrapper" style="margin-bottom:1rem;">
+        <table>
+          <thead>
+            <tr>
+              <th>Team A</th>
+              <th style="text-align:center;">Score A</th>
+              <th style="text-align:center;">Score B</th>
+              <th>Team B</th>
+              <th>Result</th>
+              {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+                <th>Action</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for match in stage_data.matches %}
+            {% with score=match.score %}
+            <tr {% if score and score.result_a != 'pending' %}style="background:rgba(39,174,96,0.05);"{% endif %}>
+              <td>
+                <strong>{{ match.team_a.abbreviation }}</strong>
+                <span style="color:var(--secondary); font-size:0.8rem; display:block;">{{ match.team_a.name }}</span>
+              </td>
+              <td style="text-align:center; font-size:1.1rem; font-weight:700;">
+                {% if score %}{{ score.score_a }}{% else %}<span style="color:var(--secondary);">—</span>{% endif %}
+              </td>
+              <td style="text-align:center; font-size:1.1rem; font-weight:700;">
+                {% if score %}{{ score.score_b }}{% else %}<span style="color:var(--secondary);">—</span>{% endif %}
+              </td>
+              <td>
+                <strong>{{ match.team_b.abbreviation }}</strong>
+                <span style="color:var(--secondary); font-size:0.8rem; display:block;">{{ match.team_b.name }}</span>
+              </td>
+              <td>
+                {% if score and score.result_a != 'pending' %}
+                  {% if score.result_a == 'win' %}
+                    <span style="color:#059669; font-weight:700;">🏆 {{ match.team_a.abbreviation }} wins</span>
+                  {% elif score.result_a == 'loss' %}
+                    <span style="color:#059669; font-weight:700;">🏆 {{ match.team_b.abbreviation }} wins</span>
+                  {% else %}
+                    <span style="color:#d97706; font-weight:700;">🤝 Draw</span>
+                  {% endif %}
+                {% else %}
+                  <span style="color:var(--secondary); font-size:0.85rem; font-style:italic;">Pending</span>
+                {% endif %}
+              </td>
+              {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+              <td>
+                <a href="{% url 'score_update' match.pk %}" class="btn-sm-primary">
+                  {% if score and score.result_a != 'pending' %}Edit Score{% else %}Enter Score{% endif %}
+                </a>
+              </td>
+              {% endif %}
+            </tr>
+            {% endwith %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+
+    </div>
+    {% endfor %}
+
+  </div>
+  {% endfor %}
+
+{% else %}
+  <div class="card" style="text-align:center; color:var(--secondary); padding:3rem 1rem;">
+    No matches found. Create an event to get started.
+  </div>
+{% endif %}
+{% endblock %}

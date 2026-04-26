@@ -1,0 +1,55 @@
+{% extends "core/base.html" %}
+
+{% block title %}Enter Score — Intramurals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Enter Score</h1>
+</div>
+
+<div class="form-card">
+  <div class="match-details">
+    <p><strong>Event:</strong> {{ match.event.name }}</p>
+    <p><strong>Match:</strong> {{ match.team_a.name }} vs {{ match.team_b.name }}</p>
+    <p><strong>Date &amp; Time:</strong> {{ match.date_time|date:"M d, Y H:i" }}</p>
+    <p><strong>Venue:</strong> {{ match.venue }}</p>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+
+    {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">
+          {% if field.html_name == 'score_a' %}
+            Score — {{ match.team_a.name }}
+          {% elif field.html_name == 'score_b' %}
+            Score — {{ match.team_b.name }}
+          {% else %}
+            {{ field.label }}
+          {% endif %}
+        </label>
+        <input class="form-control" type="number" min="0" step="0.5"
+               id="{{ field.id_for_label }}" name="{{ field.html_name }}"
+               value="{{ field.value|default:'0' }}" style="max-width:140px;">
+        {% if field.errors %}
+          <ul class="form-errors">
+            {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    {% if form.non_field_errors %}
+      <ul class="form-errors" style="margin-bottom:1rem;">
+        {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">Save Score</button>
+      <a href="{% url 'results_list' %}" class="btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

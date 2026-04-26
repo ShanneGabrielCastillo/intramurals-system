@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+
+{% block title %}Dashboard — Intramurals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Dashboard</h1>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-number">{{ total_events }}</div>
+    <div class="stat-label">Total Events</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">{{ total_matches }}</div>
+    <div class="stat-label">Total Matches</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">{{ completed_matches }}</div>
+    <div class="stat-label">Completed Matches</div>
+  </div>
+  <div class="stat-card">
+    {% if top_department %}
+      <div class="stat-number" style="font-size:1.4rem;">{{ top_department.department.abbreviation }}</div>
+      <div class="stat-label">Top Department</div>
+      <div style="font-size:0.8rem; color:var(--secondary); margin-top:0.25rem;">
+        {{ top_department.points }} pts
+      </div>
+    {% else %}
+      <div class="stat-number">—</div>
+      <div class="stat-label">Top Department</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

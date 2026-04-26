@@ -1,0 +1,88 @@
+{% extends "core/base.html" %}
+
+{% block title %}Overall Leaderboard — Intramurals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Overall Leaderboard</h1>
+  <span style="font-size: 0.9rem; color: var(--secondary);">General Champion Standings</span>
+</div>
+
+{% with has_results=False %}
+{% for entry in standings %}{% if entry.total_points > 0 %}{% with has_results=True %}{% endwith %}{% endif %}{% endfor %}
+{% endwith %}
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Department</th>
+        <th>🥇 Gold</th>
+        <th>🥈 Silver</th>
+        <th>🥉 Bronze</th>
+        <th>Total Points</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in standings %}
+      <tr {% if entry.rank == 1 and entry.total_points > 0 %}class="rank-gold"{% endif %}>
+        <td>
+          {% if entry.rank == 1 and entry.total_points > 0 %}🏆
+          {% elif entry.rank == 2 and entry.total_points > 0 %}🥈
+          {% elif entry.rank == 3 and entry.total_points > 0 %}🥉
+          {% else %}{{ entry.rank }}
+          {% endif %}
+        </td>
+        <td>{{ entry.department.name }} ({{ entry.department.abbreviation }})</td>
+        <td>
+          {% if entry.gold > 0 %}
+            <strong style="color: #d4a017;">{{ entry.gold }}</strong>
+          {% else %}
+            <span style="color: var(--secondary);">0</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if entry.silver > 0 %}
+            <strong style="color: #9e9e9e;">{{ entry.silver }}</strong>
+          {% else %}
+            <span style="color: var(--secondary);">0</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if entry.bronze > 0 %}
+            <strong style="color: #cd7f32;">{{ entry.bronze }}</strong>
+          {% else %}
+            <span style="color: var(--secondary);">0</span>
+          {% endif %}
+        </td>
+        <td><strong>{{ entry.total_points }}</strong></td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">No results recorded yet.</div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if standings %}
+  {% with top=standings.0 %}
+    {% if top.total_points == 0 %}
+      <p style="text-align:center; color:var(--secondary); margin-top:1rem; font-size:0.9rem;">
+        No results recorded yet — standings will update once final matches are scored.
+      </p>
+    {% endif %}
+  {% endwith %}
+{% endif %}
+
+<div class="card" style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--secondary);">
+  <strong>Point System:</strong>
+  &nbsp; 🥇 Gold = 5 pts &nbsp;|&nbsp; 🥈 Silver = 3 pts &nbsp;|&nbsp; 🥉 Bronze = 1 pt
+  <br>
+  <span style="font-size: 0.8rem;">Tiebreaker: Gold count → Silver count</span>
+</div>
+{% endblock %}

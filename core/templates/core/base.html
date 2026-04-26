@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Intramurals Management System{% endblock %}</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="{% url 'dashboard' %}">🏆 Intramurals</a>
+
+  <ul class="navbar-links" id="navLinks">
+    <li>
+      <a href="{% url 'dashboard' %}"
+         class="{% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'home' %}active{% endif %}">
+        Dashboard
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'department_list' %}"
+         class="{% if request.resolver_match.url_name == 'department_list' %}active{% endif %}">
+        Departments
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'event_list' %}"
+         class="{% if request.resolver_match.url_name == 'event_list' or request.resolver_match.url_name == 'event_create' or request.resolver_match.url_name == 'event_update' %}active{% endif %}">
+        Events
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'match_list' %}"
+         class="{% if request.resolver_match.url_name == 'match_list' or request.resolver_match.url_name == 'match_create' or request.resolver_match.url_name == 'match_update' %}active{% endif %}">
+        Schedule
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'results_list' %}"
+         class="{% if request.resolver_match.url_name == 'results_list' or request.resolver_match.url_name == 'score_update' %}active{% endif %}">
+        Results
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'leaderboard' %}"
+         class="{% if request.resolver_match.url_name == 'leaderboard' %}active{% endif %}">
+        Event Standings
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'overall_leaderboard' %}"
+         class="{% if request.resolver_match.url_name == 'overall_leaderboard' %}active{% endif %}">
+        Overall Leaderboard
+      </a>
+    </li>
+  </ul>
+
+  <div class="navbar-right" id="navRight">
+    <span class="navbar-user">
+      <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+      &nbsp;·&nbsp;{{ request.user.profile.role|capfirst }}
+    </span>
+    <button class="btn-toggle-dark" id="darkToggle" title="Toggle dark mode" aria-label="Toggle dark mode">☀️</button>
+    <form class="logout-form" method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-logout">Logout</button>
+    </form>
+  </div>
+
+  <button class="navbar-hamburger" id="hamburger" aria-label="Toggle menu">☰</button>
+</nav>
+
+<main class="main-content">
+  {% if messages %}
+    <div class="toast-container" id="toastContainer">
+      {% for message in messages %}
+        <div class="toast toast-{{ message.tags }}" role="alert">
+          <span class="toast-icon">
+            {% if 'success' in message.tags %}✅
+            {% elif 'error' in message.tags %}❌
+            {% elif 'warning' in message.tags %}⚠️
+            {% else %}ℹ️{% endif %}
+          </span>
+          <span class="toast-text">{{ message }}</span>
+          <button class="toast-close" onclick="this.parentElement.remove()" aria-label="Dismiss">×</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<script>
+  // Auto-dismiss toasts after 4 seconds
+  (function () {
+    var toasts = document.querySelectorAll('.toast');
+    toasts.forEach(function (toast) {
+      setTimeout(function () {
+        toast.style.transition = 'opacity 0.4s, transform 0.4s';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(110%)';
+        setTimeout(function () { toast.remove(); }, 400);
+      }, 4000);
+    });
+  })();
+
+  // Dark mode
+  (function () {
+    var body = document.body;
+    var btn = document.getElementById('darkToggle');
+    var isDark = sessionStorage.getItem('darkMode') === 'true';
+
+    function applyDark(dark) {
+      if (dark) {
+        body.classList.add('dark-mode');
+        btn.textContent = '🌙';
+      } else {
+        body.classList.remove('dark-mode');
+        btn.textContent = '☀️';
+      }
+    }
+
+    applyDark(isDark);
+
+    btn.addEventListener('click', function () {
+      isDark = !isDark;
+      sessionStorage.setItem('darkMode', isDark);
+      applyDark(isDark);
+    });
+  })();
+
+  // Hamburger menu
+  (function () {
+    var hamburger = document.getElementById('hamburger');
+    var navLinks = document.getElementById('navLinks');
+    var navRight = document.getElementById('navRight');
+
+    hamburger.addEventListener('click', function () {
+      navLinks.classList.toggle('open');
+      navRight.classList.toggle('open');
+    });
+  })();
+</script>
+
+</body>
+</html>

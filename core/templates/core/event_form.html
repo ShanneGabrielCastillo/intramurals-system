@@ -1,0 +1,40 @@
+{% extends "core/base.html" %}
+
+{% block title %}{% if form.instance.pk %}Edit Event{% else %}Add Event{% endif %} — Intramurals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{% if form.instance.pk %}Edit Event{% else %}Add Event{% endif %}</h1>
+</div>
+
+<div class="form-card">
+  <form method="post">
+    {% csrf_token %}
+
+    {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+          <ul class="form-errors">
+            {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    {% if form.non_field_errors %}
+      <ul class="form-errors" style="margin-bottom:1rem;">
+        {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">
+        {% if form.instance.pk %}Save Changes{% else %}Create Event{% endif %}
+      </button>
+      <a href="{% url 'event_list' %}" class="btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

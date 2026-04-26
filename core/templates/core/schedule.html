@@ -1,0 +1,131 @@
+{% extends "core/base.html" %}
+
+{% block title %}Schedule — Intramurals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Schedule</h1>
+    <p style="color:var(--secondary); font-size:0.9rem; margin-top:0.25rem;">Matches grouped by event and division.</p>
+  </div>
+  {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+    {% if not has_auto_events %}
+      <a href="{% url 'match_create' %}" class="btn-primary">+ Add Match</a>
+    {% endif %}
+  {% endif %}
+</div>
+
+<!-- Search -->
+<form class="search-form" method="get" action="{% url 'match_list' %}">
+  <input class="search-input" type="text" name="q" placeholder="Search by event, team, or venue…"
+         value="{{ query|default:'' }}">
+  <button type="submit" class="btn-primary">Search</button>
+  {% if query %}
+    <a href="{% url 'match_list' %}" class="btn-secondary">Clear</a>
+  {% endif %}
+</form>
+
+{% if event_groups %}
+
+  {% for eg in event_groups %}
+  <!-- ===== EVENT SECTION ===== -->
+  <div style="margin-bottom: 2.5rem;">
+
+    <!-- Event Header -->
+    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:2px solid var(--primary);">
+      <span style="font-size:1.4rem;">
+        {% if eg.event.format == 'group_knockout' %}🏀
+        {% elif eg.event.format == 'hybrid' %}⚽
+        {% else %}🏅{% endif %}
+      </span>
+      <div>
+        <h2 style="font-size:1.25rem; font-weight:700; color:var(--text); margin:0;">{{ eg.event.name }}</h2>
+        <span class="format-badge format-{{ eg.event.format }}" style="margin-top:0.2rem; display:inline-block;">
+          {{ eg.event.get_format_display }}
+        </span>
+      </div>
+      {% if has_bracket %}
+        <a href="{% url 'tournament_bracket' eg.event.pk %}" class="btn-sm-secondary" style="margin-left:auto;">
+          View Bracket
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Divisions inside this event -->
+    {% for div_key, div_data in eg.divisions.items %}
+    <div style="margin-bottom:1.5rem;">
+
+      <!-- Division Header -->
+      <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.75rem; padding:0.35rem 0.75rem; border-radius:5px; display:inline-block;
+        {% if div_key == 'men' %}background:#e8f0fe; color:#1a56db;{% else %}background:#fce7f3; color:#9d174d;{% endif %}">
+        {% if div_key == 'men' %}♂ Men's Division{% else %}♀ Women's Division{% endif %}
+      </h3>
+
+      <!-- Stages inside this division -->
+      {% for stage_key, stage_data in div_data.stages.items %}
+      <p style="font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--secondary); margin-bottom:0.4rem;">
+        {{ stage_data.label }}
+      </p>
+      <div class="table-wrapper" style="margin-bottom:1rem;">
+        <table>
+          <thead>
+            <tr>
+              <th>Team A</th>
+              <th>Team B</th>
+              <th>Date &amp; Time</th>
+              <th class="hide-mobile">Venue</th>
+              {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+                <th>Actions</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for match in stage_data.matches %}
+            <tr>
+              <td><strong>{{ match.team_a.abbreviation }}</strong> <span style="color:var(--secondary); font-size:0.8rem;">{{ match.team_a.name }}</span></td>
+              <td><strong>{{ match.team_b.abbreviation }}</strong> <span style="color:var(--secondary); font-size:0.8rem;">{{ match.team_b.name }}</span></td>
+              <td>
+                {% if match.venue == 'TBD' or not match.date_time %}
+                  <span style="color:var(--secondary); font-style:italic; font-size:0.85rem;">Not set</span>
+                {% else %}
+                  {{ match.date_time|date:"M d, Y H:i" }}
+                {% endif %}
+              </td>
+              <td class="hide-mobile">{{ match.venue }}</td>
+              {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+              <td>
+                <div class="actions-cell">
+                  <a href="{% url 'match_update' match.pk %}" class="btn-sm-secondary">Edit</a>
+                  {% if request.user.profile.role == 'admin' %}
+                    <form method="post" action="{% url 'match_delete' match.pk %}" style="display:inline;"
+                          onsubmit="return confirm('Delete this match?');">
+                      {% csrf_token %}
+                      <button type="submit" class="btn-sm-danger">Delete</button>
+                    </form>
+                  {% endif %}
+                </div>
+              </td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+
+    </div>
+    {% endfor %}
+
+  </div>
+  {% endfor %}
+
+{% else %}
+  <div class="card" style="text-align:center; color:var(--secondary); padding:3rem 1rem;">
+    {% if query %}
+      No matches found for "{{ query }}".
+    {% else %}
+      No matches scheduled yet. Create an event to auto-generate matches.
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

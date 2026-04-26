@@ -1,0 +1,56 @@
+{% extends "core/base.html" %}
+
+{% block title %}Events — Intramurals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Events</h1>
+  {% if request.user.profile.role == 'admin' %}
+    <a href="{% url 'event_create' %}" class="btn-primary">+ Add Event</a>
+  {% endif %}
+</div>
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>Event Name</th>
+        <th class="hide-mobile">Description</th>
+        <th>Format</th>
+        <th>Created Date</th>
+        {% if request.user.profile.role == 'admin' %}
+          <th>Actions</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for event in events %}
+      <tr>
+        <td>{{ event.name }}</td>
+        <td class="hide-mobile">{{ event.description|default:"—" }}</td>
+        <td><span class="format-badge format-{{ event.format }}">{{ event.get_format_display }}</span></td>
+        <td>{{ event.created_at|date:"M d, Y" }}</td>
+        {% if request.user.profile.role == 'admin' %}
+        <td>
+          <div class="actions-cell">
+            <a href="{% url 'event_update' event.pk %}" class="btn-sm-secondary">Edit</a>
+            <form method="post" action="{% url 'event_delete' event.pk %}" style="display:inline;"
+                  onsubmit="return confirm('Delete event &quot;{{ event.name }}&quot;? This will also delete all associated matches.');">
+              {% csrf_token %}
+              <button type="submit" class="btn-sm-danger">Delete</button>
+            </form>
+          </div>
+        </td>
+        {% endif %}
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="{% if request.user.profile.role == 'admin' %}5{% else %}4{% endif %}">
+          <div class="empty-state">No events yet. {% if request.user.profile.role == 'admin' %}<a href="{% url 'event_create' %}">Add the first event.</a>{% endif %}</div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

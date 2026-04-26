@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+
+{% block title %}Departments — Intramurals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Departments</h1>
+</div>
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Department Name</th>
+        <th>Abbreviation</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for dept in departments %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ dept.name }}</td>
+        <td>{{ dept.abbreviation }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="3">
+          <div class="empty-state">No departments found.</div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

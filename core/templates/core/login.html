@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — Intramurals Management System</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 1rem;
+    }
+
+    .login-wrapper {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* Logo / Brand */
+    .brand {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+    .brand-icon {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .brand-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+    .brand-sub {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.55);
+      margin-top: 0.25rem;
+    }
+
+    /* Card */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+      padding: 2.25rem 2rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 0.2rem;
+    }
+    .card-sub {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-bottom: 1.75rem;
+    }
+
+    /* Error */
+    .error-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
+    }
+    .error-box::before { content: '⚠️'; font-size: 1rem; }
+
+    /* Form groups */
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #374151;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+    }
+
+    /* Input wrapper for icon + toggle */
+    .input-wrap {
+      position: relative;
+    }
+    .input-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      pointer-events: none;
+      opacity: 0.45;
+    }
+    .input-wrap input {
+      width: 100%;
+      padding: 0.65rem 2.75rem 0.65rem 2.5rem;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: #111827;
+      background: #f9fafb;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    .input-wrap input:focus {
+      border-color: #4f6ef7;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(79,110,247,0.15);
+    }
+    .input-wrap input::placeholder { color: #9ca3af; }
+
+    /* Password toggle */
+    .toggle-pw {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.1rem;
+      opacity: 0.45;
+      padding: 0;
+      line-height: 1;
+      transition: opacity 0.15s;
+    }
+    .toggle-pw:hover { opacity: 0.8; }
+
+    /* Remember me */
+    .remember-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .remember-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #4f6ef7;
+      cursor: pointer;
+    }
+    .remember-row label {
+      font-size: 0.875rem;
+      color: #4b5563;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      padding: 0.75rem;
+      background: #4f6ef7;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      box-shadow: 0 4px 14px rgba(79,110,247,0.35);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-submit:hover {
+      background: #3a57d4;
+      box-shadow: 0 6px 20px rgba(79,110,247,0.45);
+    }
+    .btn-submit:active { transform: scale(0.98); }
+
+    /* Loading spinner (shown on submit) */
+    .btn-submit .spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Footer note */
+    .login-footer {
+      text-align: center;
+      margin-top: 1.25rem;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .card { padding: 1.75rem 1.25rem; }
+      .brand-title { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-wrapper">
+
+    <!-- Brand -->
+    <div class="brand">
+      <span class="brand-icon">🏆</span>
+      <div class="brand-title">Intramurals Management System</div>
+      <div class="brand-sub">Sign in to access your dashboard</div>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+      <div class="card-title">Welcome back</div>
+      <div class="card-sub">Enter your credentials to continue</div>
+
+      {% if error %}
+        <div class="error-box">{{ error }}</div>
+      {% endif %}
+
+      <form method="post" id="loginForm">
+        {% csrf_token %}
+
+        <!-- Username -->
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="input-wrap">
+            <span class="input-icon">👤</span>
+            <input type="text" id="username" name="username"
+                   placeholder="Enter your username"
+                   autocomplete="username"
+                   value="{{ request.POST.username|default:'' }}"
+                   required>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="password" name="password"
+                   placeholder="Enter your password"
+                   autocomplete="current-password"
+                   required>
+            <button type="button" class="toggle-pw" id="togglePw" title="Show/hide password" aria-label="Toggle password visibility">
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <!-- Remember Me -->
+        <div class="remember-row">
+          <input type="checkbox" id="remember_me" name="remember_me">
+          <label for="remember_me">Remember me</label>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span id="btnText">Sign In</span>
+          <span class="spinner" id="btnSpinner"></span>
+        </button>
+      </form>
+    </div>
+
+    <div class="login-footer">Intramurals Management System &copy; 2026</div>
+  </div>
+
+  <script>
+    // Show/hide password toggle
+    (function () {
+      var input = document.getElementById('password');
+      var btn = document.getElementById('togglePw');
+      btn.addEventListener('click', function () {
+        if (input.type === 'password') {
+          input.type = 'text';
+          btn.textContent = '🙈';
+          btn.title = 'Hide password';
+        } else {
+          input.type = 'password';
+          btn.textContent = '👁️';
+          btn.title = 'Show password';
+        }
+      });
+    })();
+
+    // Loading spinner on submit
+    (function () {
+      var form = document.getElementById('loginForm');
+      var btnText = document.getElementById('btnText');
+      var spinner = document.getElementById('btnSpinner');
+      form.addEventListener('submit', function () {
+        btnText.style.display = 'none';
+        spinner.style.display = 'block';
+      });
+    })();
+  </script>
+</body>
+</html>

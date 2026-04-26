@@ -1,0 +1,326 @@
+{% extends "core/base.html" %}
+
+{% block title %}Event Standings — Intramurals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Event Standings</h1>
+    <p style="color:var(--secondary); font-size:0.9rem; margin-top:0.25rem;">View standings for each sport/event.</p>
+  </div>
+</div>
+
+<!-- Event Selector -->
+<div class="card" style="margin-bottom:1.5rem;">
+  <form method="get" action="{% url 'leaderboard' %}" style="display:flex; align-items:flex-end; gap:1rem; flex-wrap:wrap;">
+    <div style="flex:1; min-width:200px;">
+      <label style="display:block; font-size:0.8rem; font-weight:600; color:var(--secondary); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.04em;">Select Event</label>
+      <select name="event_id" class="form-control" style="max-width:300px;">
+        <option value="">— Choose an event —</option>
+        {% for event in events %}
+          <option value="{{ event.pk }}" {% if event_id == event.pk|stringformat:"s" %}selected{% endif %}>
+            {% if event.format == 'group_knockout' %}🏀{% elif event.format == 'hybrid' %}⚽{% else %}🏅{% endif %}
+            {{ event.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn-primary" style="white-space:nowrap;">
+      📊 View Standings
+    </button>
+  </form>
+</div>
+
+{% if selected_event and event_data %}
+
+<!-- Division Toggle -->
+<div style="display:flex; gap:0.5rem; margin-bottom:1.25rem; align-items:center;">
+  <span style="font-size:0.85rem; font-weight:600; color:var(--secondary); margin-right:0.5rem;">Division:</span>
+  <a href="?event_id={{ selected_event.pk }}&tab={{ active_tab }}&division=men"
+     class="{% if division == 'men' %}btn-primary{% else %}btn-secondary{% endif %}"
+     style="padding:0.4rem 1rem; font-size:0.85rem; border-radius:5px; text-decoration:none; font-weight:600;">
+    ♂ Men
+  </a>
+  <a href="?event_id={{ selected_event.pk }}&tab={{ active_tab }}&division=women"
+     class="{% if division == 'women' %}btn-primary{% else %}btn-secondary{% endif %}"
+     style="padding:0.4rem 1rem; font-size:0.85rem; border-radius:5px; text-decoration:none; font-weight:600;">
+    ♀ Women
+  </a>
+</div>
+
+<!-- Event Title -->
+<div style="margin-bottom:1.25rem;">
+  <h2 style="font-size:1.4rem; font-weight:700; color:var(--text);">
+    {% if event_data.format == 'group_knockout' %}🏀{% elif event_data.format == 'hybrid' %}⚽{% else %}🏅{% endif %}
+    {{ selected_event.name }} — {{ division|title }}'s Division
+  </h2>
+  <span class="format-badge format-{{ event_data.format }}" style="margin-top:0.3rem; display:inline-block;">
+    {{ selected_event.get_format_display }}
+  </span>
+</div>
+
+<!-- Tabs -->
+<div class="standings-tabs" style="display:flex; gap:0; margin-bottom:1.5rem; border-bottom:2px solid var(--border);">
+  <a href="?event_id={{ selected_event.pk }}&tab=standings&division={{ division }}"
+     class="standings-tab {% if active_tab == 'standings' %}standings-tab-active{% endif %}">
+    Standings
+  </a>
+  {% if event_data.format == 'group_knockout' or event_data.format == 'hybrid' %}
+  <a href="?event_id={{ selected_event.pk }}&tab=bracket&division={{ division }}"
+     class="standings-tab {% if active_tab == 'bracket' %}standings-tab-active{% endif %}">
+    {% if event_data.format == 'group_knockout' %}Knockout Bracket{% else %}Knockout Section{% endif %}
+  </a>
+  {% endif %}
+  <a href="?event_id={{ selected_event.pk }}&tab=matches&division={{ division }}"
+     class="standings-tab {% if active_tab == 'matches' %}standings-tab-active{% endif %}">
+    Matches
+  </a>
+</div>
+
+<!-- ===== TAB: STANDINGS ===== -->
+{% if active_tab == 'standings' %}
+
+  {% if event_data.format == 'group_knockout' %}
+    <!-- Group A -->
+    <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.6rem; color:var(--text);">Group A</h3>
+    <div class="table-wrapper" style="margin-bottom:1.5rem;">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Department</th>
+            <th>Wins</th>
+            <th>Losses</th>
+            <th>Draws</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in event_data.group_a %}
+          <tr {% if entry.rank == 1 %}class="rank-gold"{% endif %}>
+            <td>{{ entry.rank }}</td>
+            <td>{{ entry.department.name }} ({{ entry.department.abbreviation }})</td>
+            <td>{{ entry.wins }}</td>
+            <td>{{ entry.losses }}</td>
+            <td>{{ entry.draws }}</td>
+            <td><strong>{{ entry.points }}</strong></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6"><div class="empty-state">No results yet.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Group B -->
+    <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.6rem; color:var(--text);">Group B</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Department</th>
+            <th>Wins</th>
+            <th>Losses</th>
+            <th>Draws</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in event_data.group_b %}
+          <tr {% if entry.rank == 1 %}class="rank-gold"{% endif %}>
+            <td>{{ entry.rank }}</td>
+            <td>{{ entry.department.name }} ({{ entry.department.abbreviation }})</td>
+            <td>{{ entry.wins }}</td>
+            <td>{{ entry.losses }}</td>
+            <td>{{ entry.draws }}</td>
+            <td><strong>{{ entry.points }}</strong></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6"><div class="empty-state">No results yet.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  {% elif event_data.format == 'hybrid' %}
+    <!-- Round Robin Standings -->
+    <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.6rem; color:var(--text);">Round Robin Standings</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Department</th>
+            <th>Wins</th>
+            <th>Losses</th>
+            <th>Draws</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in event_data.rr_standings %}
+          <tr {% if entry.rank == 1 %}class="rank-gold"{% endif %}>
+            <td>{{ entry.rank }}</td>
+            <td>{{ entry.department.name }} ({{ entry.department.abbreviation }})</td>
+            <td>{{ entry.wins }}</td>
+            <td>{{ entry.losses }}</td>
+            <td>{{ entry.draws }}</td>
+            <td><strong>{{ entry.points }}</strong></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6"><div class="empty-state">No results yet.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  {% else %}
+    <!-- Round Robin (plain) -->
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Department</th>
+            <th>Wins</th>
+            <th>Losses</th>
+            <th>Draws</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in event_data.rr_standings %}
+          <tr {% if entry.rank == 1 %}class="rank-gold"{% endif %}>
+            <td>{{ entry.rank }}</td>
+            <td>{{ entry.department.name }} ({{ entry.department.abbreviation }})</td>
+            <td>{{ entry.wins }}</td>
+            <td>{{ entry.losses }}</td>
+            <td>{{ entry.draws }}</td>
+            <td><strong>{{ entry.points }}</strong></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6"><div class="empty-state">No results yet.</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+
+{% endif %}
+
+<!-- ===== TAB: BRACKET ===== -->
+{% if active_tab == 'bracket' %}
+
+  {% if event_data.semis %}
+  <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.6rem; color:var(--text);">Semifinals</h3>
+  <div class="table-wrapper" style="margin-bottom:1.5rem;">
+    <table>
+      <thead>
+        <tr><th>Team A</th><th>Score</th><th>Team B</th><th>Result</th></tr>
+      </thead>
+      <tbody>
+        {% for semi in event_data.semis %}
+        <tr>
+          <td>{{ semi.team_a.name }} ({{ semi.team_a.abbreviation }})</td>
+          <td>
+            {% if semi.score and semi.score.result_a != 'pending' %}
+              <strong>{{ semi.score.score_a }} – {{ semi.score.score_b }}</strong>
+            {% else %}TBD{% endif %}
+          </td>
+          <td>{{ semi.team_b.name }} ({{ semi.team_b.abbreviation }})</td>
+          <td>
+            {% if semi.score and semi.score.result_a == 'win' %}{{ semi.team_a.abbreviation }} wins
+            {% elif semi.score and semi.score.result_a == 'loss' %}{{ semi.team_b.abbreviation }} wins
+            {% elif semi.score and semi.score.result_a == 'draw' %}Draw
+            {% else %}Pending{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {% if event_data.finals %}
+  <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.6rem; color:var(--text);">Finals</h3>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Stage</th><th>Team A</th><th>Score</th><th>Team B</th><th>Result</th></tr>
+      </thead>
+      <tbody>
+        {% for match in event_data.finals %}
+        <tr {% if match.stage == 'final' %}class="rank-gold"{% endif %}>
+          <td>{{ match.get_stage_display }}</td>
+          <td>{{ match.team_a.name }} ({{ match.team_a.abbreviation }})</td>
+          <td>
+            {% if match.score and match.score.result_a != 'pending' %}
+              <strong>{{ match.score.score_a }} – {{ match.score.score_b }}</strong>
+            {% else %}TBD{% endif %}
+          </td>
+          <td>{{ match.team_b.name }} ({{ match.team_b.abbreviation }})</td>
+          <td>
+            {% if match.score and match.score.result_a == 'win' %}{{ match.team_a.abbreviation }} wins
+            {% elif match.score and match.score.result_a == 'loss' %}{{ match.team_b.abbreviation }} wins
+            {% elif match.score and match.score.result_a == 'draw' %}Draw
+            {% else %}Pending{% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-state">Finals not yet scheduled.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state" style="padding:2rem 0;">Knockout matches not yet generated.</div>
+  {% endif %}
+
+{% endif %}
+
+<!-- ===== TAB: MATCHES ===== -->
+{% if active_tab == 'matches' %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th>Team A</th>
+          <th>Score</th>
+          <th>Team B</th>
+          <th>Date &amp; Time</th>
+          <th class="hide-mobile">Venue</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for match in event_data.matches %}
+        <tr>
+          <td>{{ match.get_stage_display }}{% if match.group %} (Grp {{ match.group }}){% endif %}</td>
+          <td>{{ match.team_a.abbreviation }}</td>
+          <td>
+            {% if match.score and match.score.result_a != 'pending' %}
+              {{ match.score.score_a }} – {{ match.score.score_b }}
+            {% else %}TBD{% endif %}
+          </td>
+          <td>{{ match.team_b.abbreviation }}</td>
+          <td>{{ match.date_time|date:"M d, Y H:i" }}</td>
+          <td class="hide-mobile">{{ match.venue }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="empty-state">No matches scheduled for this division yet.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+
+{% elif event_id %}
+  <div class="card"><div class="empty-state">Event not found.</div></div>
+{% else %}
+  <div class="card" style="text-align:center; color:var(--secondary); padding:3rem 1rem;">
+    Select an event above to view its standings.
+  </div>
+{% endif %}
+
+{% endblock %}
