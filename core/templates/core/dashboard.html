@@ -1,36 +1,189 @@
 {% extends "core/base.html" %}
+{% load score_filters %}
 
 {% block title %}Dashboard — Intramurals{% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <h1>Dashboard</h1>
+
+<!-- ===== HEADER ===== -->
+<div class="dash-header">
+  <div>
+    <h1 class="dash-title">Dashboard</h1>
+    <p class="dash-subtitle">
+      Welcome back, <strong>{{ request.user.username }}</strong>! Here's what's happening in your intramurals.
+    </p>
+  </div>
 </div>
 
-<div class="stat-grid">
-  <div class="stat-card">
-    <div class="stat-number">{{ total_events }}</div>
-    <div class="stat-label">Total Events</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-number">{{ total_matches }}</div>
-    <div class="stat-label">Total Matches</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-number">{{ completed_matches }}</div>
-    <div class="stat-label">Completed Matches</div>
-  </div>
-  <div class="stat-card">
-    {% if top_department %}
-      <div class="stat-number" style="font-size:1.4rem;">{{ top_department.department.abbreviation }}</div>
-      <div class="stat-label">Top Department</div>
-      <div style="font-size:0.8rem; color:var(--secondary); margin-top:0.25rem;">
-        {{ top_department.points }} pts
-      </div>
-    {% else %}
-      <div class="stat-number">—</div>
-      <div class="stat-label">Top Department</div>
-    {% endif %}
-  </div>
+<!-- ===== STAT CARDS ===== -->
+<div class="dash-stat-grid">
+
+  <a href="{% url 'event_list' %}" class="dash-stat-card dash-stat-blue">
+    <div class="dash-stat-icon">📅</div>
+    <div class="dash-stat-body">
+      <div class="dash-stat-number">{{ total_events }}</div>
+      <div class="dash-stat-label">Total Events</div>
+      <div class="dash-stat-link">View events →</div>
+    </div>
+  </a>
+
+  <a href="{% url 'match_list' %}" class="dash-stat-card dash-stat-purple">
+    <div class="dash-stat-icon">🏅</div>
+    <div class="dash-stat-body">
+      <div class="dash-stat-number">{{ total_matches }}</div>
+      <div class="dash-stat-label">Total Matches</div>
+      <div class="dash-stat-link">View schedule →</div>
+    </div>
+  </a>
+
+  <a href="{% url 'results_list' %}" class="dash-stat-card dash-stat-green">
+    <div class="dash-stat-icon">✅</div>
+    <div class="dash-stat-body">
+      <div class="dash-stat-number">{{ completed_matches }}</div>
+      <div class="dash-stat-label">Completed Matches</div>
+      <div class="dash-stat-link">View results →</div>
+    </div>
+  </a>
+
+  <a href="{% url 'overall_leaderboard' %}" class="dash-stat-card dash-stat-gold">
+    <div class="dash-stat-icon">🏆</div>
+    <div class="dash-stat-body">
+      {% if top_department %}
+        <div class="dash-stat-number" style="font-size:1.4rem;">{{ top_department.department.abbreviation }}</div>
+        <div class="dash-stat-label">Top Department</div>
+        <div class="dash-medal-row">
+          <span class="dash-medal">🥇 {{ top_department.gold }}</span>
+          <span class="dash-medal">🥈 {{ top_department.silver }}</span>
+          <span class="dash-medal">🥉 {{ top_department.bronze }}</span>
+        </div>
+      {% else %}
+        <div class="dash-stat-number">—</div>
+        <div class="dash-stat-label">Top Department</div>
+        <div class="dash-stat-link">No results yet</div>
+      {% endif %}
+    </div>
+  </a>
+
 </div>
+
+<!-- ===== ROW 2: RECENT + UPCOMING ===== -->
+<div class="dash-row2">
+
+  <!-- Recent Match Results -->
+  <div class="dash-panel">
+    <div class="dash-panel-header">
+      <span class="dash-panel-title">🕐 Recent Match Results</span>
+      <a href="{% url 'results_list' %}" class="dash-panel-link">View all</a>
+    </div>
+    <div class="dash-panel-body">
+      {% if recent_matches %}
+        {% for match in recent_matches %}
+        <div class="dash-match-row">
+          <div class="dash-match-event">
+            <span class="dash-match-event-name">{{ match.event.name }}</span>
+            {% if match.category %}
+              <span class="dash-badge dash-badge-gray">{{ match.category.get_category_type_display }}</span>
+            {% endif %}
+            {% if match.division == 'men' %}
+              <span class="dash-badge dash-badge-men">♂ Men</span>
+            {% elif match.division == 'women' %}
+              <span class="dash-badge dash-badge-women">♀ Women</span>
+            {% elif match.division == 'mixed' %}
+              <span class="dash-badge dash-badge-mixed">🔀 Mixed</span>
+            {% endif %}
+          </div>
+          <div class="dash-match-teams">
+            <div class="team" style="gap:6px;">
+              {% if match.team_a.logo %}
+                <img src="{{ match.team_a.logo.url }}" alt="" class="team-logo" style="width:24px;height:24px;">
+              {% else %}
+                <div class="team-logo-placeholder" style="width:24px;height:24px;font-size:0.6rem;">{{ match.team_a.abbreviation|slice:":2" }}</div>
+              {% endif %}
+              <span class="dash-team-name">{{ match.team_a.abbreviation }}</span>
+            </div>
+            <div class="dash-score">
+              {% if match.score %}
+                <span>{{ match.score.score_a|score_display }}</span>
+                <span class="dash-score-sep">–</span>
+                <span>{{ match.score.score_b|score_display }}</span>
+              {% else %}
+                <span style="color:var(--secondary);">vs</span>
+              {% endif %}
+            </div>
+            <div class="team" style="gap:6px;">
+              {% if match.team_b.logo %}
+                <img src="{{ match.team_b.logo.url }}" alt="" class="team-logo" style="width:24px;height:24px;">
+              {% else %}
+                <div class="team-logo-placeholder" style="width:24px;height:24px;font-size:0.6rem;">{{ match.team_b.abbreviation|slice:":2" }}</div>
+              {% endif %}
+              <span class="dash-team-name">{{ match.team_b.abbreviation }}</span>
+            </div>
+          </div>
+          <span class="dash-badge dash-badge-green">Completed</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="dash-empty">No recent matches yet.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Upcoming Matches -->
+  <div class="dash-panel">
+    <div class="dash-panel-header">
+      <span class="dash-panel-title">📆 Upcoming Matches</span>
+      <a href="{% url 'match_list' %}" class="dash-panel-link">View all</a>
+    </div>
+    <div class="dash-panel-body">
+      {% if upcoming_matches %}
+        {% for match in upcoming_matches %}
+        <div class="dash-match-row">
+          <div class="dash-match-event">
+            <span class="dash-match-event-name">{{ match.event.name }}</span>
+            {% if match.category %}
+              <span class="dash-badge dash-badge-gray">{{ match.category.get_category_type_display }}</span>
+            {% endif %}
+            {% if match.division == 'men' %}
+              <span class="dash-badge dash-badge-men">♂ Men</span>
+            {% elif match.division == 'women' %}
+              <span class="dash-badge dash-badge-women">♀ Women</span>
+            {% elif match.division == 'mixed' %}
+              <span class="dash-badge dash-badge-mixed">🔀 Mixed</span>
+            {% endif %}
+          </div>
+          <div class="dash-match-teams">
+            <div class="team" style="gap:6px;">
+              {% if match.team_a.logo %}
+                <img src="{{ match.team_a.logo.url }}" alt="" class="team-logo" style="width:24px;height:24px;">
+              {% else %}
+                <div class="team-logo-placeholder" style="width:24px;height:24px;font-size:0.6rem;">{{ match.team_a.abbreviation|slice:":2" }}</div>
+              {% endif %}
+              <span class="dash-team-name">{{ match.team_a.abbreviation }}</span>
+            </div>
+            <span style="color:var(--secondary); font-size:0.85rem; font-weight:600;">vs</span>
+            <div class="team" style="gap:6px;">
+              {% if match.team_b.logo %}
+                <img src="{{ match.team_b.logo.url }}" alt="" class="team-logo" style="width:24px;height:24px;">
+              {% else %}
+                <div class="team-logo-placeholder" style="width:24px;height:24px;font-size:0.6rem;">{{ match.team_b.abbreviation|slice:":2" }}</div>
+              {% endif %}
+              <span class="dash-team-name">{{ match.team_b.abbreviation }}</span>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+            <span class="dash-badge dash-badge-yellow">Upcoming</span>
+            {% if match.venue != 'TBD' and match.date_time %}
+              <span class="dash-match-date">{{ match.date_time|date:"M d, H:i" }}</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="dash-empty">No upcoming matches scheduled.</div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
 {% endblock %}

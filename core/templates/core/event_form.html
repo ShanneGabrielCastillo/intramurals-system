@@ -8,20 +8,51 @@
 </div>
 
 <div class="form-card">
-  <form method="post">
+  <form method="post" id="event-form">
     {% csrf_token %}
 
-    {% for field in form %}
-      <div class="form-group">
-        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% if field.errors %}
-          <ul class="form-errors">
-            {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
-          </ul>
-        {% endif %}
+    <!-- Name -->
+    <div class="form-group">
+      <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+      {{ form.name }}
+      {% if form.name.errors %}<ul class="form-errors">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+
+    <!-- Description -->
+    <div class="form-group">
+      <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+      {{ form.description }}
+      {% if form.description.errors %}<ul class="form-errors">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+
+    <!-- Format -->
+    <div class="form-group">
+      <label for="{{ form.format.id_for_label }}">{{ form.format.label }}</label>
+      {{ form.format }}
+      {% if form.format.errors %}<ul class="form-errors">{% for e in form.format.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+
+    <!-- Division Type -->
+    <div class="form-group">
+      <label for="{{ form.division_type.id_for_label }}">{{ form.division_type.label }}</label>
+      {{ form.division_type }}
+      {% if form.division_type.errors %}<ul class="form-errors">{% for e in form.division_type.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+
+    <!-- Enable Categories checkbox -->
+    <div class="form-group">
+      <div class="checkbox-row">
+        {{ form.has_categories }}
+        <label for="{{ form.has_categories.id_for_label }}" class="checkbox-label">
+          Enable Categories
+        </label>
       </div>
-    {% endfor %}
+      <p id="categories-hint" class="form-hint" style="display:none;">
+        ✅ Three categories will be auto-created: <strong>Singles</strong>, <strong>Doubles</strong>, and <strong>Mixed</strong>.
+        Matches will be generated separately for each category and division.
+      </p>
+      {% if form.has_categories.errors %}<ul class="form-errors">{% for e in form.has_categories.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
 
     {% if form.non_field_errors %}
       <ul class="form-errors" style="margin-bottom:1rem;">
@@ -29,12 +60,40 @@
       </ul>
     {% endif %}
 
+    {% if needs_confirm %}
+    <!-- Confirmation warning shown when scored matches exist and structure is changing -->
+    <div class="form-hint" style="background:#fef3c7; border-color:#d97706; color:#92400e; margin-bottom:1rem;">
+      ⚠️ <strong>Warning:</strong> This event has scored matches.
+      Saving will <strong>permanently delete all existing matches and results</strong> for this event
+      and regenerate them based on the new settings.
+      <br><br>
+      Click <strong>"Save &amp; Regenerate"</strong> to confirm, or <strong>Cancel</strong> to go back.
+    </div>
+    <input type="hidden" name="confirm_regenerate" value="1">
+    {% endif %}
+
     <div class="form-actions">
       <button type="submit" class="btn-primary">
-        {% if form.instance.pk %}Save Changes{% else %}Create Event{% endif %}
+        {% if needs_confirm %}
+          ⚠️ Save &amp; Regenerate
+        {% elif form.instance.pk %}
+          Save Changes
+        {% else %}
+          Create Event
+        {% endif %}
       </button>
       <a href="{% url 'event_list' %}" class="btn-secondary">Cancel</a>
     </div>
   </form>
 </div>
+
+<script>
+  (function () {
+    const cb = document.getElementById('{{ form.has_categories.id_for_label }}');
+    const hint = document.getElementById('categories-hint');
+    function toggle() { hint.style.display = cb.checked ? 'block' : 'none'; }
+    cb.addEventListener('change', toggle);
+    toggle(); // run on page load (handles edit mode where checkbox may already be checked)
+  })();
+</script>
 {% endblock %}

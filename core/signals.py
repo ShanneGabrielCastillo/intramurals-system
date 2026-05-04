@@ -1,48 +1,126 @@
 """
 Tournament stage progression and medal result signal.
-Fires after every Score save to:
-1. Automatically generate the next round of matches when the current stage is complete.
-2. Automatically save Gold/Silver/Bronze EventResult records for final and third-place matches.
 
-Also fires after every Event save to:
-3. Auto-generate round-robin matches when a hybrid event is created.
-4. Auto-generate group matches when a group_knockout event is created.
+on_event_saved  — fires after Event creation:
+  • If has_categories=True: creates Singles/Doubles/Mixed EventCategory objects,
+    then generates matches per category × division.
+  • If has_categories=False: generates matches per division (existing behaviour).
+
+on_score_saved  — fires after every Score save:
+  • Advances knockout stages for the correct division + category combination.
+  • Saves Gold/Silver/Bronze EventResult records.
 """
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from .models import Event, Score
+from .models import Event, EventCategory, Score
 from . import tournament_service, result_service
+
+# Ordered list of categories auto-created when has_categories=True
+_AUTO_CATEGORIES = [
+    ('singles', 'Singles'),
+    ('doubles', 'Doubles'),
+    ('mixed',   'Mixed'),
+]
+
+
+def _get_divisions(event):
+    """Return list of division strings based on event.division_type."""
+    dt = event.division_type
+    if dt == 'men':
+        return ['men']
+    elif dt == 'women':
+        return ['women']
+    return ['men', 'women']
 
 
 @receiver(post_save, sender=Event)
 def on_event_saved(sender, instance, created, **kwargs):
     """
-    When a new hybrid or group_knockout event is created, automatically
-    generate the initial round of matches so organizers only need to
-    fill in date/time and venue.
-
-    Uses get_or_create internally so running this multiple times is safe
-    — it will never create duplicate matches.
+    Auto-generate matches when a new event is created.
+    Only runs on creation (not edits) to avoid duplicate matches.
     """
     if not created:
-        return  # only trigger on creation, not on edits
+        return
 
-    if instance.format == 'hybrid':
-        # Generate all 15 round-robin matches (6 teams, every pair once)
-        # for both Men's and Women's divisions
-        tournament_service.generate_round_robin_matches(instance, division='men')
-        tournament_service.generate_round_robin_matches(instance, division='women')
+    if instance.has_categories:
+        # 1. Create the three categories
+        categories = []
+        for cat_type, cat_name in _AUTO_CATEGORIES:
+            cat, _ = EventCategory.objects.get_or_create(
+                event=instance,
+                category_type=cat_type,
+                defaults={'name': cat_name},
+            )
+            categories.append(cat)
 
-    elif instance.format == 'group_knockout':
-        # Generate 6 intra-group matches (3 per group) for both divisions
-        tournament_service.generate_group_matches(instance, division='men')
-        tournament_service.generate_group_matches(instance, division='women')
+        # 2. Generate matches per category × division
+        for cat in categories:
+            if cat.category_type == 'mixed':
+                # Mixed always uses division='mixed'
+                _generate_initial_matches(instance, division='mixed', category=cat)
+            else:
+                # Singles / Doubles respect division_type
+                for div in _get_divisions(instance):
+                    _generate_initial_matches(instance, division=div, category=cat)
+    else:
+        # No categories — standard generation per division
+        for div in _get_divisions(instance):
+            _generate_initial_matches(instance, division=div, category=None)
+
+
+def _generate_initial_matches(event, division, category):
+    """Dispatch to the correct generator based on event format."""
+    if event.format == 'hybrid':
+        tournament_service.generate_round_robin_matches(event, division=division, category=category)
+    elif event.format == 'group_knockout':
+        tournament_service.generate_group_matches(event, division=division, category=category)
+    # round_robin format: no auto-generation (matches added manually)
+
+
+def regenerate_matches_for_event(event):
+    """
+    Delete all existing matches for the event and regenerate them
+    based on the event's current format, division_type, and has_categories.
+
+    Called when an event's format/division/category settings change.
+    Caller is responsible for wrapping this in a transaction.
+    """
+    # Delete all matches (cascades to Score, EventResult via FK)
+    event.matches.all().delete()
+
+    if event.has_categories:
+        # Ensure categories exist (get_or_create is idempotent)
+        categories = []
+        for cat_type, cat_name in _AUTO_CATEGORIES:
+            cat, _ = EventCategory.objects.get_or_create(
+                event=event,
+                category_type=cat_type,
+                defaults={'name': cat_name},
+            )
+            categories.append(cat)
+
+        for cat in categories:
+            if cat.category_type == 'mixed':
+                _generate_initial_matches(event, division='mixed', category=cat)
+            else:
+                for div in _get_divisions(event):
+                    _generate_initial_matches(event, division=div, category=cat)
+    else:
+        for div in _get_divisions(event):
+            _generate_initial_matches(event, division=div, category=None)
 
 
 @receiver(post_save, sender=Score)
 def on_score_saved(sender, instance, **kwargs):
-    event = instance.match.event
-    tournament_service.check_and_advance_stage(event, division='men')
-    tournament_service.check_and_advance_stage(event, division='women')
-    result_service.save_event_results(instance)  # derive and persist medal positions
+    """
+    After a score is saved, advance the knockout stage for the correct
+    division + category combination, then update medal standings.
+    """
+    match = instance.match
+    event = match.event
+    division = match.division
+    category = match.category  # None for non-category events
+
+    tournament_service.check_and_advance_stage(event, division=division, category=category)
+    result_service.save_event_results(instance)

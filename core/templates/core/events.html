@@ -35,7 +35,7 @@
           <div class="actions-cell">
             <a href="{% url 'event_update' event.pk %}" class="btn-sm-secondary">Edit</a>
             <form method="post" action="{% url 'event_delete' event.pk %}" style="display:inline;"
-                  onsubmit="return confirm('Delete event &quot;{{ event.name }}&quot;? This will also delete all associated matches.');">
+                  data-confirm-delete="Delete event &quot;{{ event.name }}&quot;? This will also delete all associated matches and results. This action cannot be undone.">
               {% csrf_token %}
               <button type="submit" class="btn-sm-danger">Delete</button>
             </form>

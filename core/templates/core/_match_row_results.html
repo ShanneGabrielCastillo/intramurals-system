@@ -1,0 +1,57 @@
+{% load score_filters %}
+{% with score=match.score %}
+<tr {% if score and score.result_a != 'pending' %}style="background:rgba(39,174,96,0.05);"{% endif %}>
+  <td>
+    <div class="team">
+      {% if match.team_a.logo %}
+        <img src="{{ match.team_a.logo.url }}" alt="{{ match.team_a.abbreviation }} logo" class="team-logo">
+      {% else %}
+        <div class="team-logo-placeholder">{{ match.team_a.abbreviation|slice:":2" }}</div>
+      {% endif %}
+      <div>
+        <strong>{{ match.team_a.abbreviation }}</strong>
+        <span style="color:var(--secondary); font-size:0.8rem; display:block;">{{ match.team_a.name }}</span>
+      </div>
+    </div>
+  </td>
+  <td style="text-align:center; font-size:1.1rem; font-weight:700;">
+    {% if score %}{{ score.score_a|score_display }}{% else %}<span style="color:var(--secondary);">—</span>{% endif %}
+  </td>
+  <td style="text-align:center; font-size:1.1rem; font-weight:700;">
+    {% if score %}{{ score.score_b|score_display }}{% else %}<span style="color:var(--secondary);">—</span>{% endif %}
+  </td>
+  <td>
+    <div class="team">
+      {% if match.team_b.logo %}
+        <img src="{{ match.team_b.logo.url }}" alt="{{ match.team_b.abbreviation }} logo" class="team-logo">
+      {% else %}
+        <div class="team-logo-placeholder">{{ match.team_b.abbreviation|slice:":2" }}</div>
+      {% endif %}
+      <div>
+        <strong>{{ match.team_b.abbreviation }}</strong>
+        <span style="color:var(--secondary); font-size:0.8rem; display:block;">{{ match.team_b.name }}</span>
+      </div>
+    </div>
+  </td>
+  <td>
+    {% if score and score.result_a != 'pending' %}
+      {% if score.result_a == 'win' %}
+        <span style="color:#059669; font-weight:700;">🏆 {{ match.team_a.abbreviation }} wins</span>
+      {% elif score.result_a == 'loss' %}
+        <span style="color:#059669; font-weight:700;">🏆 {{ match.team_b.abbreviation }} wins</span>
+      {% else %}
+        <span style="color:#d97706; font-weight:700;">🤝 Draw</span>
+      {% endif %}
+    {% else %}
+      <span style="color:var(--secondary); font-size:0.85rem; font-style:italic;">Pending</span>
+    {% endif %}
+  </td>
+  {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+  <td>
+    <a href="{% url 'score_update' match.pk %}" class="btn-sm-primary">
+      {% if score and score.result_a != 'pending' %}Edit Score{% else %}Enter Score{% endif %}
+    </a>
+  </td>
+  {% endif %}
+</tr>
+{% endwith %}

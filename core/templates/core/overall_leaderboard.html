@@ -34,7 +34,16 @@
           {% else %}{{ entry.rank }}
           {% endif %}
         </td>
-        <td>{{ entry.department.name }} ({{ entry.department.abbreviation }})</td>
+        <td>
+          <div class="team">
+            {% if entry.department.logo %}
+              <img src="{{ entry.department.logo.url }}" alt="{{ entry.department.abbreviation }} logo" class="team-logo">
+            {% else %}
+              <div class="team-logo-placeholder">{{ entry.department.abbreviation|slice:":2" }}</div>
+            {% endif %}
+            <span>{{ entry.department.name }} ({{ entry.department.abbreviation }})</span>
+          </div>
+        </td>
         <td>
           {% if entry.gold > 0 %}
             <strong style="color: #d4a017;">{{ entry.gold }}</strong>

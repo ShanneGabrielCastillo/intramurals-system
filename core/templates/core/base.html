@@ -93,6 +93,19 @@
   {% block content %}{% endblock %}
 </main>
 
+<!-- ===== GLOBAL DELETE CONFIRMATION MODAL ===== -->
+<div id="deleteModal" class="del-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="delModalTitle" style="display:none;">
+  <div class="del-modal">
+    <div class="del-modal-icon">🗑️</div>
+    <h2 class="del-modal-title" id="delModalTitle">Confirm Deletion</h2>
+    <p class="del-modal-msg" id="delModalMsg">This action cannot be undone.</p>
+    <div class="del-modal-actions">
+      <button class="btn-secondary" id="delModalCancel">Cancel</button>
+      <button class="btn-danger" id="delModalConfirm">Delete</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // Auto-dismiss toasts after 4 seconds
   (function () {
@@ -141,6 +154,57 @@
     hamburger.addEventListener('click', function () {
       navLinks.classList.toggle('open');
       navRight.classList.toggle('open');
+    });
+  })();
+
+  // Delete confirmation modal
+  (function () {
+    var modal    = document.getElementById('deleteModal');
+    var msgEl    = document.getElementById('delModalMsg');
+    var cancelBtn = document.getElementById('delModalCancel');
+    var confirmBtn = document.getElementById('delModalConfirm');
+    var pendingForm = null;
+
+    // Any form with data-confirm-delete will use the modal instead of browser confirm()
+    document.addEventListener('submit', function (e) {
+      var form = e.target;
+      if (!form.hasAttribute('data-confirm-delete')) return;
+      e.preventDefault();
+      pendingForm = form;
+      msgEl.textContent = form.getAttribute('data-confirm-delete') || 'This action cannot be undone.';
+      modal.style.display = 'flex';
+      cancelBtn.focus();
+    });
+
+    cancelBtn.addEventListener('click', function () {
+      modal.style.display = 'none';
+      pendingForm = null;
+    });
+
+    confirmBtn.addEventListener('click', function () {
+      modal.style.display = 'none';
+      if (pendingForm) {
+        // Remove the data attribute so the submit listener doesn't intercept again
+        pendingForm.removeAttribute('data-confirm-delete');
+        pendingForm.submit();
+        pendingForm = null;
+      }
+    });
+
+    // Close on backdrop click
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+        pendingForm = null;
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal.style.display !== 'none') {
+        modal.style.display = 'none';
+        pendingForm = null;
+      }
     });
   })();
 </script>

@@ -19,6 +19,12 @@ class Department(models.Model):
     name = models.CharField(max_length=100)
     abbreviation = models.CharField(max_length=10)
     display_order = models.PositiveIntegerField()
+    logo = models.ImageField(
+        upload_to='department_logos/',
+        null=True,
+        blank=True,
+        help_text='Upload department logo (PNG or JPG recommended)',
+    )
 
     class Meta:
         ordering = ['display_order']
@@ -29,9 +35,13 @@ class Department(models.Model):
 
 class Event(models.Model):
     FORMAT_CHOICES = [
-        ('round_robin', 'Round Robin'),
         ('hybrid', 'Hybrid'),
         ('group_knockout', 'Group Knockout'),
+    ]
+    DIVISION_TYPE_CHOICES = [
+        ('men', 'Men Only'),
+        ('women', 'Women Only'),
+        ('both', 'Both Divisions'),
     ]
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
@@ -39,11 +49,46 @@ class Event(models.Model):
     format = models.CharField(
         max_length=20,
         choices=FORMAT_CHOICES,
-        default='round_robin',
+        default='hybrid',
+    )
+    division_type = models.CharField(
+        max_length=10,
+        choices=DIVISION_TYPE_CHOICES,
+        default='both',
+        help_text='Which division(s) this event is played in.',
+    )
+    has_categories = models.BooleanField(
+        default=False,
+        help_text='Enable for sports with multiple categories (e.g. Badminton: Singles, Doubles, Mixed). '
+                  'When enabled, standings are shown per category + division.',
     )
 
     def __str__(self):
         return self.name
+
+
+class EventCategory(models.Model):
+    """
+    Optional sub-categories for an event (e.g. Badminton Singles, Doubles, Mixed).
+    Category = Singles / Doubles / Mixed  (the TYPE of play)
+    Division = Men / Women / Mixed        (who plays — set on the Match)
+    Mixed category forces division='mixed' on its matches.
+    """
+    CATEGORY_CHOICES = [
+        ('singles', 'Singles'),
+        ('doubles', 'Doubles'),
+        ('mixed', 'Mixed'),
+    ]
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='categories')
+    name = models.CharField(max_length=50)
+    category_type = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+
+    class Meta:
+        ordering = ['category_type']
+        unique_together = [('event', 'category_type')]
+
+    def __str__(self):
+        return f"{self.event.name} — {self.get_category_type_display()}"
 
 
 class Match(models.Model):
@@ -61,6 +106,7 @@ class Match(models.Model):
     DIVISION_CHOICES = [
         ('men', 'Men'),
         ('women', 'Women'),
+        ('mixed', 'Mixed'),
     ]
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='matches')
     team_a = models.ForeignKey(Department, on_delete=models.PROTECT, related_name='home_matches')
@@ -80,10 +126,17 @@ class Match(models.Model):
         choices=DIVISION_CHOICES,
         default='men',
     )
+    category = models.ForeignKey(
+        'EventCategory',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='matches',
+    )
 
     class Meta:
         ordering = ['date_time']
-        unique_together = [('event', 'team_a', 'team_b', 'stage', 'division')]
+        unique_together = [('event', 'team_a', 'team_b', 'stage', 'division', 'category')]
 
     def __str__(self):
         return f"{self.team_a} vs {self.team_b} — {self.event}"
@@ -103,6 +156,7 @@ class Score(models.Model):
     score_b = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     result_a = models.CharField(max_length=10, choices=RESULT_CHOICES, default='pending')
     result_b = models.CharField(max_length=10, choices=RESULT_CHOICES, default='pending')
+    updated_at = models.DateTimeField(auto_now=True)  # set automatically on every save
 
     def compute_result(self):
         if self.score_a > self.score_b:

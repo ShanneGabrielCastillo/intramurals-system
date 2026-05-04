@@ -1,0 +1,50 @@
+<tr>
+  <td>
+    <div class="team">
+      {% if match.team_a.logo %}
+        <img src="{{ match.team_a.logo.url }}" alt="{{ match.team_a.abbreviation }} logo" class="team-logo">
+      {% else %}
+        <div class="team-logo-placeholder">{{ match.team_a.abbreviation|slice:":2" }}</div>
+      {% endif %}
+      <div>
+        <strong>{{ match.team_a.abbreviation }}</strong>
+        <span style="color:var(--secondary); font-size:0.8rem; display:block;">{{ match.team_a.name }}</span>
+      </div>
+    </div>
+  </td>
+  <td>
+    <div class="team">
+      {% if match.team_b.logo %}
+        <img src="{{ match.team_b.logo.url }}" alt="{{ match.team_b.abbreviation }} logo" class="team-logo">
+      {% else %}
+        <div class="team-logo-placeholder">{{ match.team_b.abbreviation|slice:":2" }}</div>
+      {% endif %}
+      <div>
+        <strong>{{ match.team_b.abbreviation }}</strong>
+        <span style="color:var(--secondary); font-size:0.8rem; display:block;">{{ match.team_b.name }}</span>
+      </div>
+    </div>
+  </td>
+  <td>
+    {% if match.venue == 'TBD' or not match.date_time %}
+      <span style="color:var(--secondary); font-style:italic; font-size:0.85rem;">Not set</span>
+    {% else %}
+      {{ match.date_time|date:"M d, Y H:i" }}
+    {% endif %}
+  </td>
+  <td class="hide-mobile">{{ match.venue }}</td>
+  {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+  <td>
+    <div class="actions-cell">
+      <a href="{% url 'match_update' match.pk %}" class="btn-sm-secondary">Edit</a>
+      {% if request.user.profile.role == 'admin' %}
+        <form method="post" action="{% url 'match_delete' match.pk %}" style="display:inline;"
+              data-confirm-delete="Delete this match? This action cannot be undone.">
+          {% csrf_token %}
+          <button type="submit" class="btn-sm-danger">Delete</button>
+        </form>
+      {% endif %}
+    </div>
+  </td>
+  {% endif %}
+</tr>

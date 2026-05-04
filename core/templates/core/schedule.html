@@ -6,7 +6,7 @@
 <div class="page-header">
   <div>
     <h1>Schedule</h1>
-    <p style="color:var(--secondary); font-size:0.9rem; margin-top:0.25rem;">Matches grouped by event and division.</p>
+    <p style="color:var(--secondary); font-size:0.9rem; margin-top:0.25rem;">Matches grouped by event and category.</p>
   </div>
   {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
     {% if not has_auto_events %}
@@ -28,93 +28,114 @@
 {% if event_groups %}
 
   {% for eg in event_groups %}
-  <!-- ===== EVENT SECTION ===== -->
-  <div style="margin-bottom: 2.5rem;">
+  <div class="sched-event-block">
 
-    <!-- Event Header -->
-    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:2px solid var(--primary);">
-      <span style="font-size:1.4rem;">
+    <!-- ===== EVENT HEADER ===== -->
+    <div class="sched-event-header">
+      <span class="sched-event-icon">
         {% if eg.event.format == 'group_knockout' %}🏀
-        {% elif eg.event.format == 'hybrid' %}⚽
-        {% else %}🏅{% endif %}
+        {% else %}⚽{% endif %}
       </span>
       <div>
-        <h2 style="font-size:1.25rem; font-weight:700; color:var(--text); margin:0;">{{ eg.event.name }}</h2>
-        <span class="format-badge format-{{ eg.event.format }}" style="margin-top:0.2rem; display:inline-block;">
-          {{ eg.event.get_format_display }}
-        </span>
+        <h2 class="sched-event-title">{{ eg.event.name }}</h2>
+        <span class="format-badge format-{{ eg.event.format }}">{{ eg.event.get_format_display }}</span>
       </div>
-      {% if has_bracket %}
-        <a href="{% url 'tournament_bracket' eg.event.pk %}" class="btn-sm-secondary" style="margin-left:auto;">
-          View Bracket
-        </a>
-      {% endif %}
     </div>
 
-    <!-- Divisions inside this event -->
-    {% for div_key, div_data in eg.divisions.items %}
-    <div style="margin-bottom:1.5rem;">
+    {% if eg.has_categories %}
 
-      <!-- Division Header -->
-      <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.75rem; padding:0.35rem 0.75rem; border-radius:5px; display:inline-block;
-        {% if div_key == 'men' %}background:#e8f0fe; color:#1a56db;{% else %}background:#fce7f3; color:#9d174d;{% endif %}">
-        {% if div_key == 'men' %}♂ Men's Division{% else %}♀ Women's Division{% endif %}
-      </h3>
+      {# ===== CATEGORY EVENT: event → category → division → stage ===== #}
+      {% for cat_key, cat_data in eg.categories.items %}
+      <div class="sched-category-block">
 
-      <!-- Stages inside this division -->
-      {% for stage_key, stage_data in div_data.stages.items %}
-      <p style="font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--secondary); margin-bottom:0.4rem;">
-        {{ stage_data.label }}
-      </p>
-      <div class="table-wrapper" style="margin-bottom:1rem;">
-        <table>
-          <thead>
-            <tr>
-              <th>Team A</th>
-              <th>Team B</th>
-              <th>Date &amp; Time</th>
-              <th class="hide-mobile">Venue</th>
-              {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
-                <th>Actions</th>
-              {% endif %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for match in stage_data.matches %}
-            <tr>
-              <td><strong>{{ match.team_a.abbreviation }}</strong> <span style="color:var(--secondary); font-size:0.8rem;">{{ match.team_a.name }}</span></td>
-              <td><strong>{{ match.team_b.abbreviation }}</strong> <span style="color:var(--secondary); font-size:0.8rem;">{{ match.team_b.name }}</span></td>
-              <td>
-                {% if match.venue == 'TBD' or not match.date_time %}
-                  <span style="color:var(--secondary); font-style:italic; font-size:0.85rem;">Not set</span>
-                {% else %}
-                  {{ match.date_time|date:"M d, Y H:i" }}
-                {% endif %}
-              </td>
-              <td class="hide-mobile">{{ match.venue }}</td>
-              {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
-              <td>
-                <div class="actions-cell">
-                  <a href="{% url 'match_update' match.pk %}" class="btn-sm-secondary">Edit</a>
-                  {% if request.user.profile.role == 'admin' %}
-                    <form method="post" action="{% url 'match_delete' match.pk %}" style="display:inline;"
-                          onsubmit="return confirm('Delete this match?');">
-                      {% csrf_token %}
-                      <button type="submit" class="btn-sm-danger">Delete</button>
-                    </form>
+        <!-- Category Header -->
+        <div class="sched-category-header">
+          <span>{{ cat_data.icon }}</span>
+          <span>{{ cat_data.label }}</span>
+        </div>
+
+        {% for div_key, div_data in cat_data.divisions.items %}
+        <div class="sched-division-block">
+
+          <!-- Division Label -->
+          <div class="sched-division-label sched-division-{{ div_key }}">
+            {{ div_data.label }}
+          </div>
+
+          {% for stage_key, stage_data in div_data.stages.items %}
+          <p class="sched-stage-label">{{ stage_data.label }}</p>
+          <div class="table-wrapper" style="margin-bottom:1rem;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Team A</th>
+                  <th>Team B</th>
+                  <th>Date &amp; Time</th>
+                  <th class="hide-mobile">Venue</th>
+                  {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+                    <th>Actions</th>
                   {% endif %}
-                </div>
-              </td>
-              {% endif %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+                </tr>
+              </thead>
+              <tbody>
+                {% for match in stage_data.matches %}
+                {% include "core/_match_row_schedule.html" %}
+                {% empty %}
+                <tr><td colspan="5"><div class="empty-state">No matches available.</div></td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% endfor %}
+
+        </div>
+        {% endfor %}
+
+      </div>
+      {% empty %}
+      <div class="card" style="color:var(--secondary); text-align:center; padding:2rem;">No matches available.</div>
+      {% endfor %}
+
+    {% else %}
+
+      {# ===== NON-CATEGORY EVENT: event → division → stage ===== #}
+      {% for div_key, div_data in eg.divisions.items %}
+      <div class="sched-division-block">
+
+        <div class="sched-division-label sched-division-{{ div_key }}">
+          {{ div_data.label }}
+        </div>
+
+        {% for stage_key, stage_data in div_data.stages.items %}
+        <p class="sched-stage-label">{{ stage_data.label }}</p>
+        <div class="table-wrapper" style="margin-bottom:1rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>Team A</th>
+                <th>Team B</th>
+                <th>Date &amp; Time</th>
+                <th class="hide-mobile">Venue</th>
+                {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+                  <th>Actions</th>
+                {% endif %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for match in stage_data.matches %}
+              {% include "core/_match_row_schedule.html" %}
+              {% empty %}
+              <tr><td colspan="5"><div class="empty-state">No matches available.</div></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endfor %}
+
       </div>
       {% endfor %}
 
-    </div>
-    {% endfor %}
+    {% endif %}
 
   </div>
   {% endfor %}

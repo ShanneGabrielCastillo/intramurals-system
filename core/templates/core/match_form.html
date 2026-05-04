@@ -8,6 +8,50 @@
 </div>
 
 <div class="form-card">
+
+  {% if match %}
+  <!-- ===== READ-ONLY MATCH INFO (edit mode only) ===== -->
+  <div class="match-readonly-block">
+    <p class="match-readonly-title">Match Details</p>
+    <div class="match-readonly-grid">
+      <div class="match-readonly-item">
+        <span class="match-readonly-label">Event</span>
+        <span class="match-readonly-value">{{ match.event.name }}</span>
+      </div>
+      <div class="match-readonly-item">
+        <span class="match-readonly-label">Format</span>
+        <span class="match-readonly-value">{{ match.event.get_format_display }}</span>
+      </div>
+      <div class="match-readonly-item">
+        <span class="match-readonly-label">Stage</span>
+        <span class="match-readonly-value">{{ match.get_stage_display }}</span>
+      </div>
+      <div class="match-readonly-item">
+        <span class="match-readonly-label">Division</span>
+        <span class="match-readonly-value">
+          {% if match.division == 'men' %}♂ Men's
+          {% elif match.division == 'women' %}♀ Women's
+          {% elif match.division == 'mixed' %}🔀 Mixed
+          {% else %}{{ match.division|capfirst }}{% endif %}
+        </span>
+      </div>
+      {% if match.group %}
+      <div class="match-readonly-item">
+        <span class="match-readonly-label">Group</span>
+        <span class="match-readonly-value">Group {{ match.group }}</span>
+      </div>
+      {% endif %}
+      {% if match.category %}
+      <div class="match-readonly-item">
+        <span class="match-readonly-label">Category</span>
+        <span class="match-readonly-value">{{ match.category.get_category_type_display }}</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ===== EDITABLE FIELDS ===== -->
   <form method="post">
     {% csrf_token %}
 
@@ -36,5 +80,6 @@
       <a href="{% url 'match_list' %}" class="btn-secondary">Cancel</a>
     </div>
   </form>
+
 </div>
 {% endblock %}

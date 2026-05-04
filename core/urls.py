@@ -18,6 +18,5 @@ urlpatterns = [
     path('results/', views.results_list, name='results_list'),
     path('results/<int:pk>/score/', views.score_update, name='score_update'),
     path('leaderboard/', views.leaderboard_view, name='leaderboard'),
-    path('events/<int:event_pk>/bracket/', views.tournament_bracket, name='tournament_bracket'),
     path('overall-leaderboard/', views.overall_leaderboard_view, name='overall_leaderboard'),
 ]
