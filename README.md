@@ -46,7 +46,7 @@ A web-based intramural sports management system built with Django. It handles ev
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/ShanneGabrielCastillo/intramurals-system.git
+git clone <repository-url>
 cd intramurals
 ```
 
