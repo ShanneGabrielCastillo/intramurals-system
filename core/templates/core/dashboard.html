@@ -71,55 +71,106 @@
 
   <!-- Recent Match Results -->
   <div class="dash-panel">
-    <div class="dash-panel-header">
+    <div class="dash-panel-header mob-panel-header">
       <span class="dash-panel-title">🕐 Recent Match Results</span>
-      <a href="{% url 'results_list' %}" class="dash-panel-link">View all</a>
+      <a href="{% url 'results_list' %}" class="dash-panel-link mob-view-all">View all</a>
     </div>
     <div class="dash-panel-body">
       {% if recent_matches %}
         {% for match in recent_matches %}
-        <div class="dash-match-row">
-          <div class="dash-match-event">
-            <span class="dash-match-event-name">{{ match.event.name }}</span>
-            {% if match.category %}
-              <span class="dash-badge dash-badge-gray">{{ match.category.get_category_type_display }}</span>
-            {% endif %}
-            {% if match.division == 'men' %}
-              <span class="dash-badge dash-badge-men">♂ Men</span>
-            {% elif match.division == 'women' %}
-              <span class="dash-badge dash-badge-women">♀ Women</span>
-            {% elif match.division == 'mixed' %}
-              <span class="dash-badge dash-badge-mixed">🔀 Mixed</span>
-            {% endif %}
+        <div class="dash-match-row mob-match-card">
+          <!-- Mobile card layout (hidden on desktop via CSS) -->
+          <div class="mob-card-inner">
+            <div class="mob-card-meta">
+              <span class="mob-event-name">{{ match.event.name }}</span>
+              <div class="mob-badges">
+                {% if match.category %}
+                  <span class="dash-badge dash-badge-gray">{{ match.category.get_category_type_display }}</span>
+                {% endif %}
+                {% if match.division == 'men' %}
+                  <span class="dash-badge dash-badge-men">♂ Men</span>
+                {% elif match.division == 'women' %}
+                  <span class="dash-badge dash-badge-women">♀ Women</span>
+                {% elif match.division == 'mixed' %}
+                  <span class="dash-badge dash-badge-mixed">🔀 Mixed</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="mob-matchup">
+              <div class="mob-team">
+                {% if match.team_a.logo %}
+                  <img src="{{ match.team_a.logo.url }}" alt="" class="team-logo mob-logo">
+                {% else %}
+                  <div class="team-logo-placeholder mob-logo">{{ match.team_a.abbreviation|slice:":2" }}</div>
+                {% endif %}
+                <span class="mob-team-name">{{ match.team_a.abbreviation }}</span>
+              </div>
+              <div class="mob-score-block">
+                {% if match.score %}
+                  <span class="mob-score">{{ match.score.score_a|score_display }}</span>
+                  <span class="mob-score-sep">–</span>
+                  <span class="mob-score">{{ match.score.score_b|score_display }}</span>
+                {% else %}
+                  <span class="mob-score-sep">vs</span>
+                {% endif %}
+              </div>
+              <div class="mob-team">
+                {% if match.team_b.logo %}
+                  <img src="{{ match.team_b.logo.url }}" alt="" class="team-logo mob-logo">
+                {% else %}
+                  <div class="team-logo-placeholder mob-logo">{{ match.team_b.abbreviation|slice:":2" }}</div>
+                {% endif %}
+                <span class="mob-team-name">{{ match.team_b.abbreviation }}</span>
+              </div>
+            </div>
+            <div class="mob-status-row">
+              <span class="dash-badge dash-badge-green mob-status-badge">✓ Completed</span>
+            </div>
           </div>
-          <div class="dash-match-teams">
-            <div class="team" style="gap:6px;">
-              {% if match.team_a.logo %}
-                <img src="{{ match.team_a.logo.url }}" alt="" class="team-logo" style="width:24px;height:24px;">
-              {% else %}
-                <div class="team-logo-placeholder" style="width:24px;height:24px;font-size:0.6rem;">{{ match.team_a.abbreviation|slice:":2" }}</div>
+          <!-- Desktop layout (original, hidden on mobile via CSS) -->
+          <div class="desk-match-inner">
+            <div class="dash-match-event">
+              <span class="dash-match-event-name">{{ match.event.name }}</span>
+              {% if match.category %}
+                <span class="dash-badge dash-badge-gray">{{ match.category.get_category_type_display }}</span>
               {% endif %}
-              <span class="dash-team-name">{{ match.team_a.abbreviation }}</span>
-            </div>
-            <div class="dash-score">
-              {% if match.score %}
-                <span>{{ match.score.score_a|score_display }}</span>
-                <span class="dash-score-sep">–</span>
-                <span>{{ match.score.score_b|score_display }}</span>
-              {% else %}
-                <span style="color:var(--secondary);">vs</span>
+              {% if match.division == 'men' %}
+                <span class="dash-badge dash-badge-men">♂ Men</span>
+              {% elif match.division == 'women' %}
+                <span class="dash-badge dash-badge-women">♀ Women</span>
+              {% elif match.division == 'mixed' %}
+                <span class="dash-badge dash-badge-mixed">🔀 Mixed</span>
               {% endif %}
             </div>
-            <div class="team" style="gap:6px;">
-              {% if match.team_b.logo %}
-                <img src="{{ match.team_b.logo.url }}" alt="" class="team-logo" style="width:24px;height:24px;">
-              {% else %}
-                <div class="team-logo-placeholder" style="width:24px;height:24px;font-size:0.6rem;">{{ match.team_b.abbreviation|slice:":2" }}</div>
-              {% endif %}
-              <span class="dash-team-name">{{ match.team_b.abbreviation }}</span>
+            <div class="dash-match-teams">
+              <div class="team" style="gap:6px;">
+                {% if match.team_a.logo %}
+                  <img src="{{ match.team_a.logo.url }}" alt="" class="team-logo" style="width:24px;height:24px;">
+                {% else %}
+                  <div class="team-logo-placeholder" style="width:24px;height:24px;font-size:0.6rem;">{{ match.team_a.abbreviation|slice:":2" }}</div>
+                {% endif %}
+                <span class="dash-team-name">{{ match.team_a.abbreviation }}</span>
+              </div>
+              <div class="dash-score">
+                {% if match.score %}
+                  <span>{{ match.score.score_a|score_display }}</span>
+                  <span class="dash-score-sep">–</span>
+                  <span>{{ match.score.score_b|score_display }}</span>
+                {% else %}
+                  <span style="color:var(--secondary);">vs</span>
+                {% endif %}
+              </div>
+              <div class="team" style="gap:6px;">
+                {% if match.team_b.logo %}
+                  <img src="{{ match.team_b.logo.url }}" alt="" class="team-logo" style="width:24px;height:24px;">
+                {% else %}
+                  <div class="team-logo-placeholder" style="width:24px;height:24px;font-size:0.6rem;">{{ match.team_b.abbreviation|slice:":2" }}</div>
+                {% endif %}
+                <span class="dash-team-name">{{ match.team_b.abbreviation }}</span>
+              </div>
             </div>
+            <span class="dash-badge dash-badge-green">Completed</span>
           </div>
-          <span class="dash-badge dash-badge-green">Completed</span>
         </div>
         {% endfor %}
       {% else %}
@@ -130,51 +181,99 @@
 
   <!-- Upcoming Matches -->
   <div class="dash-panel">
-    <div class="dash-panel-header">
+    <div class="dash-panel-header mob-panel-header">
       <span class="dash-panel-title">📆 Upcoming Matches</span>
-      <a href="{% url 'match_list' %}" class="dash-panel-link">View all</a>
+      <a href="{% url 'match_list' %}" class="dash-panel-link mob-view-all">View all</a>
     </div>
     <div class="dash-panel-body">
       {% if upcoming_matches %}
         {% for match in upcoming_matches %}
-        <div class="dash-match-row">
-          <div class="dash-match-event">
-            <span class="dash-match-event-name">{{ match.event.name }}</span>
-            {% if match.category %}
-              <span class="dash-badge dash-badge-gray">{{ match.category.get_category_type_display }}</span>
-            {% endif %}
-            {% if match.division == 'men' %}
-              <span class="dash-badge dash-badge-men">♂ Men</span>
-            {% elif match.division == 'women' %}
-              <span class="dash-badge dash-badge-women">♀ Women</span>
-            {% elif match.division == 'mixed' %}
-              <span class="dash-badge dash-badge-mixed">🔀 Mixed</span>
-            {% endif %}
-          </div>
-          <div class="dash-match-teams">
-            <div class="team" style="gap:6px;">
-              {% if match.team_a.logo %}
-                <img src="{{ match.team_a.logo.url }}" alt="" class="team-logo" style="width:24px;height:24px;">
-              {% else %}
-                <div class="team-logo-placeholder" style="width:24px;height:24px;font-size:0.6rem;">{{ match.team_a.abbreviation|slice:":2" }}</div>
-              {% endif %}
-              <span class="dash-team-name">{{ match.team_a.abbreviation }}</span>
+        <div class="dash-match-row mob-match-card">
+          <!-- Mobile card layout -->
+          <div class="mob-card-inner">
+            <div class="mob-card-meta">
+              <span class="mob-event-name">{{ match.event.name }}</span>
+              <div class="mob-badges">
+                {% if match.category %}
+                  <span class="dash-badge dash-badge-gray">{{ match.category.get_category_type_display }}</span>
+                {% endif %}
+                {% if match.division == 'men' %}
+                  <span class="dash-badge dash-badge-men">♂ Men</span>
+                {% elif match.division == 'women' %}
+                  <span class="dash-badge dash-badge-women">♀ Women</span>
+                {% elif match.division == 'mixed' %}
+                  <span class="dash-badge dash-badge-mixed">🔀 Mixed</span>
+                {% endif %}
+              </div>
             </div>
-            <span style="color:var(--secondary); font-size:0.85rem; font-weight:600;">vs</span>
-            <div class="team" style="gap:6px;">
-              {% if match.team_b.logo %}
-                <img src="{{ match.team_b.logo.url }}" alt="" class="team-logo" style="width:24px;height:24px;">
-              {% else %}
-                <div class="team-logo-placeholder" style="width:24px;height:24px;font-size:0.6rem;">{{ match.team_b.abbreviation|slice:":2" }}</div>
+            <div class="mob-matchup">
+              <div class="mob-team">
+                {% if match.team_a.logo %}
+                  <img src="{{ match.team_a.logo.url }}" alt="" class="team-logo mob-logo">
+                {% else %}
+                  <div class="team-logo-placeholder mob-logo">{{ match.team_a.abbreviation|slice:":2" }}</div>
+                {% endif %}
+                <span class="mob-team-name">{{ match.team_a.abbreviation }}</span>
+              </div>
+              <div class="mob-score-block">
+                <span class="mob-vs">vs</span>
+              </div>
+              <div class="mob-team">
+                {% if match.team_b.logo %}
+                  <img src="{{ match.team_b.logo.url }}" alt="" class="team-logo mob-logo">
+                {% else %}
+                  <div class="team-logo-placeholder mob-logo">{{ match.team_b.abbreviation|slice:":2" }}</div>
+                {% endif %}
+                <span class="mob-team-name">{{ match.team_b.abbreviation }}</span>
+              </div>
+            </div>
+            <div class="mob-status-row">
+              <span class="dash-badge dash-badge-yellow mob-status-badge">⏳ Upcoming</span>
+              {% if match.venue != 'TBD' and match.date_time %}
+                <span class="mob-date-chip">📅 {{ match.date_time|date:"M d · H:i" }}</span>
               {% endif %}
-              <span class="dash-team-name">{{ match.team_b.abbreviation }}</span>
             </div>
           </div>
-          <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-            <span class="dash-badge dash-badge-yellow">Upcoming</span>
-            {% if match.venue != 'TBD' and match.date_time %}
-              <span class="dash-match-date">{{ match.date_time|date:"M d, H:i" }}</span>
-            {% endif %}
+          <!-- Desktop layout (original) -->
+          <div class="desk-match-inner">
+            <div class="dash-match-event">
+              <span class="dash-match-event-name">{{ match.event.name }}</span>
+              {% if match.category %}
+                <span class="dash-badge dash-badge-gray">{{ match.category.get_category_type_display }}</span>
+              {% endif %}
+              {% if match.division == 'men' %}
+                <span class="dash-badge dash-badge-men">♂ Men</span>
+              {% elif match.division == 'women' %}
+                <span class="dash-badge dash-badge-women">♀ Women</span>
+              {% elif match.division == 'mixed' %}
+                <span class="dash-badge dash-badge-mixed">🔀 Mixed</span>
+              {% endif %}
+            </div>
+            <div class="dash-match-teams">
+              <div class="team" style="gap:6px;">
+                {% if match.team_a.logo %}
+                  <img src="{{ match.team_a.logo.url }}" alt="" class="team-logo" style="width:24px;height:24px;">
+                {% else %}
+                  <div class="team-logo-placeholder" style="width:24px;height:24px;font-size:0.6rem;">{{ match.team_a.abbreviation|slice:":2" }}</div>
+                {% endif %}
+                <span class="dash-team-name">{{ match.team_a.abbreviation }}</span>
+              </div>
+              <span style="color:var(--secondary); font-size:0.85rem; font-weight:600;">vs</span>
+              <div class="team" style="gap:6px;">
+                {% if match.team_b.logo %}
+                  <img src="{{ match.team_b.logo.url }}" alt="" class="team-logo" style="width:24px;height:24px;">
+                {% else %}
+                  <div class="team-logo-placeholder" style="width:24px;height:24px;font-size:0.6rem;">{{ match.team_b.abbreviation|slice:":2" }}</div>
+                {% endif %}
+                <span class="dash-team-name">{{ match.team_b.abbreviation }}</span>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+              <span class="dash-badge dash-badge-yellow">Upcoming</span>
+              {% if match.venue != 'TBD' and match.date_time %}
+                <span class="dash-match-date">{{ match.date_time|date:"M d, H:i" }}</span>
+              {% endif %}
+            </div>
           </div>
         </div>
         {% endfor %}

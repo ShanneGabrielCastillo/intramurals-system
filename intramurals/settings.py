@@ -13,8 +13,15 @@ SECRET_KEY = 'django-insecure-dev-key-intramurals-2024-do-not-use-in-production'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.ngrok-free.dev',
+]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.ngrok-free.dev'
+]
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -49,6 +56,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.season_context',
             ],
         },
     },

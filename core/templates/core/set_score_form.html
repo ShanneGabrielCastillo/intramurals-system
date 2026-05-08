@@ -1,0 +1,66 @@
+{% extends "core/base.html" %}
+{% load score_filters %}
+
+{% block title %}Set Scores — Intramurals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Enter Set Scores</h1>
+    <p style="color:var(--secondary); font-size:0.9rem; margin-top:0.25rem;">Record the score for each set. The match result will be calculated automatically.</p>
+  </div>
+</div>
+
+<div class="form-card" style="max-width:520px;">
+
+  <!-- Match info -->
+  <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:1rem 1.1rem; margin-bottom:1.5rem;">
+    <p style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--secondary); margin-bottom:0.6rem;">Match Details</p>
+    <p style="font-size:0.88rem; font-weight:700; color:var(--text); margin-bottom:0.2rem;">{{ match.event.name }}</p>
+    <p style="font-size:0.82rem; color:var(--secondary); margin-bottom:0.15rem;">
+      {{ match.team_a.name }} <strong style="color:var(--text);">vs</strong> {{ match.team_b.name }}
+    </p>
+    <p style="font-size:0.78rem; color:var(--secondary);">Best of {{ match.best_of }} sets</p>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- Column headers -->
+    <div style="display:grid; grid-template-columns:64px 1fr 32px 1fr; gap:0.5rem; align-items:center; margin-bottom:0.5rem; padding:0 0.1rem;">
+      <span></span>
+      <span style="font-size:0.72rem; font-weight:700; color:var(--secondary); text-transform:uppercase; letter-spacing:0.06em; text-align:center;">{{ match.team_a.abbreviation }}</span>
+      <span></span>
+      <span style="font-size:0.72rem; font-weight:700; color:var(--secondary); text-transform:uppercase; letter-spacing:0.06em; text-align:center;">{{ match.team_b.abbreviation }}</span>
+    </div>
+
+    {% for ms in match_sets %}
+    <div style="display:grid; grid-template-columns:64px 1fr 32px 1fr; gap:0.5rem; align-items:center; margin-bottom:0.55rem;">
+      <span style="font-size:0.82rem; font-weight:700; color:var(--secondary);">Set {{ ms.set_number }}</span>
+      <input type="number" name="score_a_{{ ms.set_number }}" min="0"
+             value="{{ ms.score_a }}"
+             class="form-control" style="text-align:center; font-weight:700; font-size:1rem;">
+      <span style="text-align:center; color:var(--secondary); font-weight:700; font-size:1rem;">–</span>
+      <input type="number" name="score_b_{{ ms.set_number }}" min="0"
+             value="{{ ms.score_b }}"
+             class="form-control" style="text-align:center; font-weight:700; font-size:1rem;">
+    </div>
+    {% endfor %}
+
+    {% if form.non_field_errors %}
+      <ul class="form-errors" style="margin:0.75rem 0;">
+        {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+
+    <p class="form-hint" style="margin-top:0.75rem; margin-bottom:0;">
+      The match result (sets won) will be calculated automatically from the set scores above.
+    </p>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">Save Set Scores</button>
+      <a href="{% url 'results_list' %}" class="btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

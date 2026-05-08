@@ -1,0 +1,83 @@
+{% extends "core/base.html" %}
+
+{% block title %}{{ action }} Season — Intramurals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ action }} Season</h1>
+    <p style="color:var(--secondary); font-size:0.9rem; margin-top:0.25rem;">
+      {% if action == 'Edit' %}Update season details.{% else %}Create a new intramurals season.{% endif %}
+    </p>
+  </div>
+</div>
+
+<div class="form-card">
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- Name + Year side by side -->
+    <div style="display:grid; grid-template-columns:2fr 1fr; gap:1rem;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label for="{{ form.name.id_for_label }}">Season Name <span class="req">*</span></label>
+        {{ form.name }}
+        {% if form.name.errors %}<ul class="form-errors">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label for="{{ form.year.id_for_label }}">Year <span class="req">*</span></label>
+        {{ form.year }}
+        {% if form.year.errors %}<ul class="form-errors">{% for e in form.year.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+    </div>
+
+    <!-- Active season checkbox -->
+    <div class="form-group" style="margin-top:1.35rem;">
+      <label style="margin-bottom:0.45rem;">Status</label>
+      <label class="checkbox-row" for="{{ form.is_active.id_for_label }}" style="cursor:pointer;">
+        {{ form.is_active }}
+        <span class="checkbox-label">Set as Active Season</span>
+      </label>
+      <p class="form-hint form-hint-warning" style="margin-top:0.45rem;">
+        ⚠️ Setting this season as active will automatically deactivate all other seasons.
+        New events will be assigned to the active season.
+      </p>
+      {% if form.is_active.errors %}<ul class="form-errors">{% for e in form.is_active.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+
+    {% if action == 'Create' %}
+    <!-- Copy events section -->
+    <div class="form-group form-section">
+      <p class="form-section-title">📋 Copy Events From Previous Season</p>
+      <p style="font-size:0.82rem; color:var(--secondary); margin-bottom:0.75rem; line-height:1.55;">
+        Optional. Copies event names, formats, categories, and divisions into this new season.
+        Matches are auto-generated fresh — no old scores or results are copied.
+        Organizer assignments are <strong>not</strong> copied and must be reassigned.
+      </p>
+      {{ form.copy_from_season }}
+      {% if form.copy_from_season.errors %}<ul class="form-errors">{% for e in form.copy_from_season.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+    {% endif %}
+
+    {% if form.non_field_errors %}
+      <ul class="form-errors" style="margin-bottom:1rem;">
+        {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">
+        {% if action == 'Edit' %}Save Changes{% else %}Create Season{% endif %}
+      </button>
+      <a href="{% url 'season_list' %}" class="btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<style>
+  @media (max-width: 540px) {
+    .form-card form > div[style*="grid-template-columns"] {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+{% endblock %}

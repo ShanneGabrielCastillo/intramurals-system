@@ -10,7 +10,8 @@
   </div>
 </div>
 
-<!-- Search -->
+<!-- Search — hidden for organizers (they see only their assigned matches) -->
+{% if not is_organizer %}
 <form class="search-form" method="get" action="{% url 'results_list' %}">
   <input class="search-input" type="text" name="q" placeholder="Search by event, team, or venue…"
          value="{{ query|default:'' }}">
@@ -19,6 +20,7 @@
     <a href="{% url 'results_list' %}" class="btn-secondary">Clear</a>
   {% endif %}
 </form>
+{% endif %}
 
 {% if event_groups %}
 
@@ -27,10 +29,6 @@
 
     <!-- ===== EVENT HEADER ===== -->
     <div class="sched-event-header">
-      <span class="sched-event-icon">
-        {% if eg.event.format == 'group_knockout' %}🏀
-        {% else %}⚽{% endif %}
-      </span>
       <div>
         <h2 class="sched-event-title">{{ eg.event.name }}</h2>
         <span class="format-badge format-{{ eg.event.format }}">{{ eg.event.get_format_display }}</span>
@@ -67,7 +65,7 @@
                   <th style="text-align:center;">Score B</th>
                   <th>Team B</th>
                   <th>Result</th>
-                  {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+                  {% if request.user.is_authenticated and request.user.profile.role == 'admin' or request.user.is_authenticated and request.user.profile.role == 'organizer' %}
                     <th>Action</th>
                   {% endif %}
                 </tr>
@@ -112,7 +110,7 @@
                 <th style="text-align:center;">Score B</th>
                 <th>Team B</th>
                 <th>Result</th>
-                {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+                {% if request.user.is_authenticated and request.user.profile.role == 'admin' or request.user.is_authenticated and request.user.profile.role == 'organizer' %}
                   <th>Action</th>
                 {% endif %}
               </tr>

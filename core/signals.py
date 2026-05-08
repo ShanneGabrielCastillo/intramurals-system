@@ -57,7 +57,8 @@ def on_event_saved(sender, instance, created, **kwargs):
         # 2. Generate matches per category × division
         for cat in categories:
             if cat.category_type == 'mixed':
-                # Mixed always uses division='mixed'
+                # Mixed category uses division='mixed' in storage
+                # (display layer omits the redundant "Mixed Division" label)
                 _generate_initial_matches(instance, division='mixed', category=cat)
             else:
                 # Singles / Doubles respect division_type

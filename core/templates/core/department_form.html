@@ -1,0 +1,121 @@
+{% extends "core/base.html" %}
+
+{% block title %}{{ action }} Department — Intramurals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ action }} Department</h1>
+    <p style="color:var(--secondary); font-size:0.9rem; margin-top:0.25rem;">
+      {% if action == 'Edit' %}Update department details and group assignment.{% else %}Add a new department to the system.{% endif %}
+    </p>
+  </div>
+</div>
+
+<div class="form-card">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Name + Abbreviation side by side -->
+    <div style="display:grid; grid-template-columns:2fr 1fr; gap:1rem;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label for="{{ form.name.id_for_label }}">Department Name <span class="req">*</span></label>
+        {{ form.name }}
+        {% if form.name.errors %}<ul class="form-errors">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label for="{{ form.abbreviation.id_for_label }}">Abbreviation <span class="req">*</span></label>
+        {{ form.abbreviation }}
+        {% if form.abbreviation.errors %}<ul class="form-errors">{% for e in form.abbreviation.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+    </div>
+
+    <!-- Display Order + Group side by side -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1.35rem;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label for="{{ form.display_order.id_for_label }}">Display Order <span class="req">*</span></label>
+        {{ form.display_order }}
+        <p class="form-hint" style="margin-top:0.35rem; border:none; background:none; padding:0; font-size:0.75rem;">Lower numbers appear first.</p>
+        {% if form.display_order.errors %}<ul class="form-errors">{% for e in form.display_order.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label for="{{ form.group.id_for_label }}">Tournament Group <span class="label-optional">(Group Knockout)</span></label>
+        {{ form.group }}
+        {% if form.group.errors %}<ul class="form-errors">{% for e in form.group.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+    </div>
+
+    <!-- Group balance indicator -->
+    {% if group_counts %}
+    <div class="dept-group-balance" style="margin-top:0.75rem;">
+      <span class="dept-group-pill dept-group-a">Group A: {{ group_counts.A }} dept{{ group_counts.A|pluralize }}</span>
+      <span class="dept-group-pill dept-group-b">Group B: {{ group_counts.B }} dept{{ group_counts.B|pluralize }}</span>
+      {% if group_counts.unassigned > 0 %}
+        <span class="dept-group-pill dept-group-none">Unassigned: {{ group_counts.unassigned }}</span>
+      {% endif %}
+      {% if group_counts.imbalanced %}
+        <span class="dept-group-warning">⚠️ Groups are uneven — consider balancing for fairness.</span>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Season info -->
+    <div class="form-group" style="margin-top:1.35rem;">
+      <div class="form-hint" style="display:flex; align-items:flex-start; gap:0.5rem;">
+        <span>📅</span>
+        <span>
+          {% if action == 'Add' %}
+            {% if active_season %}
+              This department will be created in <strong>{{ active_season.name }}</strong> and will
+              appear in that season and all future seasons. It will <strong>not</strong> appear in any past seasons.
+            {% else %}
+              No active season found. The department will be visible in all seasons once a season is activated.
+            {% endif %}
+          {% else %}
+            {% if dept.created_season %}
+              This department was introduced in <strong>{{ dept.created_season.name }}</strong>.
+              It appears in that season and all seasons after it.
+            {% else %}
+              This department has no season assignment — it appears in all seasons.
+            {% endif %}
+          {% endif %}
+        </span>
+      </div>
+    </div>
+
+    <!-- Logo -->
+    <div class="form-group">
+      <label for="{{ form.logo.id_for_label }}">Logo <span class="label-optional">(optional)</span></label>
+      {% if dept and dept.logo %}
+        <div style="margin-bottom:0.65rem; display:flex; align-items:center; gap:0.75rem;">
+          <img src="{{ dept.logo.url }}" alt="Current logo" class="team-logo" style="width:48px; height:48px;">
+          <span style="font-size:0.8rem; color:var(--secondary);">Current logo — upload a new one to replace it.</span>
+        </div>
+      {% endif %}
+      {{ form.logo }}
+      {% if form.logo.errors %}<ul class="form-errors">{% for e in form.logo.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+
+    {% if form.non_field_errors %}
+      <ul class="form-errors" style="margin-bottom:1rem;">
+        {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">
+        {% if action == 'Edit' %}Save Changes{% else %}Add Department{% endif %}
+      </button>
+      <a href="{% url 'department_list' %}" class="btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<style>
+  @media (max-width: 540px) {
+    .form-card form > div[style*="grid-template-columns"] {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+{% endblock %}

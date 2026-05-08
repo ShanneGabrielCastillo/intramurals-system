@@ -4,31 +4,36 @@
 
 {% block content %}
 <div class="page-header">
-  <h1>{% if form.instance.pk %}Edit Match{% else %}Add Match{% endif %}</h1>
+  <div>
+    <h1>{% if form.instance.pk %}Edit Match{% else %}Add Match{% endif %}</h1>
+    <p style="color:var(--secondary); font-size:0.9rem; margin-top:0.25rem;">
+      {% if form.instance.pk %}Update match date, venue, teams, or set configuration.{% else %}Manually schedule a new match.{% endif %}
+    </p>
+  </div>
 </div>
 
 <div class="form-card">
 
   {% if match %}
-  <!-- ===== READ-ONLY MATCH INFO (edit mode only) ===== -->
-  <div class="match-readonly-block">
-    <p class="match-readonly-title">Match Details</p>
-    <div class="match-readonly-grid">
-      <div class="match-readonly-item">
-        <span class="match-readonly-label">Event</span>
-        <span class="match-readonly-value">{{ match.event.name }}</span>
+  <!-- Read-only match context (edit mode) -->
+  <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:1rem 1.1rem; margin-bottom:1.5rem;">
+    <p style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--secondary); margin-bottom:0.65rem;">Match Context</p>
+    <div style="display:flex; flex-wrap:wrap; gap:0.5rem 1.5rem;">
+      <div>
+        <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--secondary); display:block; margin-bottom:2px;">Event</span>
+        <span style="font-size:0.88rem; font-weight:700; color:var(--text);">{{ match.event.name }}</span>
       </div>
-      <div class="match-readonly-item">
-        <span class="match-readonly-label">Format</span>
-        <span class="match-readonly-value">{{ match.event.get_format_display }}</span>
+      <div>
+        <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--secondary); display:block; margin-bottom:2px;">Format</span>
+        <span style="font-size:0.88rem; font-weight:600; color:var(--text);">{{ match.event.get_format_display }}</span>
       </div>
-      <div class="match-readonly-item">
-        <span class="match-readonly-label">Stage</span>
-        <span class="match-readonly-value">{{ match.get_stage_display }}</span>
+      <div>
+        <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--secondary); display:block; margin-bottom:2px;">Stage</span>
+        <span style="font-size:0.88rem; font-weight:600; color:var(--text);">{{ match.get_stage_display }}</span>
       </div>
-      <div class="match-readonly-item">
-        <span class="match-readonly-label">Division</span>
-        <span class="match-readonly-value">
+      <div>
+        <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--secondary); display:block; margin-bottom:2px;">Division</span>
+        <span style="font-size:0.88rem; font-weight:600; color:var(--text);">
           {% if match.division == 'men' %}♂ Men's
           {% elif match.division == 'women' %}♀ Women's
           {% elif match.division == 'mixed' %}🔀 Mixed
@@ -36,22 +41,21 @@
         </span>
       </div>
       {% if match.group %}
-      <div class="match-readonly-item">
-        <span class="match-readonly-label">Group</span>
-        <span class="match-readonly-value">Group {{ match.group }}</span>
+      <div>
+        <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--secondary); display:block; margin-bottom:2px;">Group</span>
+        <span style="font-size:0.88rem; font-weight:600; color:var(--text);">Group {{ match.group }}</span>
       </div>
       {% endif %}
       {% if match.category %}
-      <div class="match-readonly-item">
-        <span class="match-readonly-label">Category</span>
-        <span class="match-readonly-value">{{ match.category.get_category_type_display }}</span>
+      <div>
+        <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--secondary); display:block; margin-bottom:2px;">Category</span>
+        <span style="font-size:0.88rem; font-weight:600; color:var(--text);">{{ match.category.get_category_type_display }}</span>
       </div>
       {% endif %}
     </div>
   </div>
   {% endif %}
 
-  <!-- ===== EDITABLE FIELDS ===== -->
   <form method="post">
     {% csrf_token %}
 
@@ -59,6 +63,9 @@
       <div class="form-group">
         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
         {{ field }}
+        {% if field.help_text %}
+          <p class="form-hint" style="border:none; background:none; padding:0.2rem 0; font-size:0.75rem; margin-top:0.2rem;">{{ field.help_text }}</p>
+        {% endif %}
         {% if field.errors %}
           <ul class="form-errors">
             {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}

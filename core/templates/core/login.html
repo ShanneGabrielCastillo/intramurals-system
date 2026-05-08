@@ -108,7 +108,7 @@
     }
     .input-wrap input {
       width: 100%;
-      padding: 0.65rem 2.75rem 0.65rem 2.5rem;
+      padding: 0.65rem 3.5rem 0.65rem 2.5rem;
       border: 1.5px solid #d1d5db;
       border-radius: 8px;
       font-size: 0.95rem;
@@ -133,13 +133,17 @@
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 1.1rem;
-      opacity: 0.45;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #4f6ef7;
       padding: 0;
       line-height: 1;
-      transition: opacity 0.15s;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      transition: color 0.15s;
+      user-select: none;
     }
-    .toggle-pw:hover { opacity: 0.8; }
+    .toggle-pw:hover { color: #3a57d4; }
 
     /* Remember me */
     .remember-row {
@@ -204,6 +208,29 @@
       color: rgba(255,255,255,0.4);
     }
 
+    /* Viewer button */
+    .btn-viewer {
+      display: inline-block;
+      width: 100%;
+      padding: 0.65rem;
+      background: transparent;
+      color: #4b5563;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .btn-viewer:hover {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+      color: #1f2937;
+      text-decoration: none;
+    }
+
     /* Responsive */
     @media (max-width: 480px) {
       .card { padding: 1.75rem 1.25rem; }
@@ -255,8 +282,8 @@
                    placeholder="Enter your password"
                    autocomplete="current-password"
                    required>
-            <button type="button" class="toggle-pw" id="togglePw" title="Show/hide password" aria-label="Toggle password visibility">
-              👁️
+            <button type="button" class="toggle-pw" id="togglePw" title="Show password" aria-label="Toggle password visibility">
+              Show
             </button>
           </div>
         </div>
@@ -273,6 +300,14 @@
           <span class="spinner" id="btnSpinner"></span>
         </button>
       </form>
+
+      <!-- Viewer Mode -->
+      <div style="text-align:center; margin-top:1.25rem;">
+        <div style="font-size:0.78rem; color:#9ca3af; margin-bottom:0.6rem;">Just want to view?</div>
+        <a href="{% url 'dashboard' %}" class="btn-viewer">
+          👁 Continue as Viewer
+        </a>
+      </div>
     </div>
 
     <div class="login-footer">Intramurals Management System &copy; 2026</div>
@@ -286,11 +321,11 @@
       btn.addEventListener('click', function () {
         if (input.type === 'password') {
           input.type = 'text';
-          btn.textContent = '🙈';
+          btn.textContent = 'Hide';
           btn.title = 'Hide password';
         } else {
           input.type = 'password';
-          btn.textContent = '👁️';
+          btn.textContent = 'Show';
           btn.title = 'Show password';
         }
       });

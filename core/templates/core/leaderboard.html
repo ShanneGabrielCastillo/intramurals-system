@@ -23,7 +23,6 @@
           <option value="">— Choose an event —</option>
           {% for event in events %}
             <option value="{{ event.pk }}" {% if event_id == event.pk|stringformat:"s" %}selected{% endif %}>
-              {% if event.format == 'group_knockout' %}🏀{% else %}⚽{% endif %}
               {{ event.name }}
             </option>
           {% endfor %}
@@ -44,7 +43,7 @@
 </div>
 <div class="lb-cat-buttons">
   {% for cat in categories %}
-  <a href="?event_id={{ selected_event.pk }}&category_id={{ cat.pk }}&division={% if cat.category_type == 'mixed' %}mixed{% else %}men{% endif %}&tab=standings"
+  <a href="?event_id={{ selected_event.pk }}&category_id={{ cat.pk }}&division={% if cat.category_type == 'mixed' %}{% else %}men{% endif %}&tab=standings"
      class="lb-cat-btn {% if selected_category and selected_category.pk == cat.pk %}lb-cat-btn-active{% endif %}">
     {% if cat.category_type == 'singles' %}👤 Singles
     {% elif cat.category_type == 'doubles' %}👥 Doubles
@@ -78,15 +77,16 @@
 </div>
 {% else %}
 {# Single division — always show a clear label so users know which division they're viewing #}
+{# For Mixed category, no division label is needed — Mixed implies combined #}
+{% if division and division != 'mixed' %}
 <div class="lb-division-label">
   {% if division == 'men' %}
     <span class="lb-division-badge lb-division-badge-men">♂ Men's Division</span>
   {% elif division == 'women' %}
     <span class="lb-division-badge lb-division-badge-women">♀ Women's Division</span>
-  {% elif division == 'mixed' %}
-    <span class="lb-division-badge lb-division-badge-mixed">🔀 Mixed Division</span>
   {% endif %}
 </div>
+{% endif %}
 {% endif %}
 
 <!-- ===== TABS: Standings | Knockout Stage ===== -->
@@ -112,6 +112,7 @@
 
     <div class="lb-group-card">
       <div class="lb-group-header">Group A</div>
+      <div class="lb-table-scroll">
       <table class="lb-table">
         <thead>
           <tr><th>Rank</th><th>Department</th><th>Wins</th><th>Losses</th><th>Draws</th><th>Points</th></tr>
@@ -135,11 +136,13 @@
           {% endfor %}
         </tbody>
       </table>
+      </div>
       <p class="lb-group-note">ℹ️ Top 2 teams from each group advance to the Semifinals.</p>
     </div>
 
     <div class="lb-group-card">
       <div class="lb-group-header">Group B</div>
+      <div class="lb-table-scroll">
       <table class="lb-table">
         <thead>
           <tr><th>Rank</th><th>Department</th><th>Wins</th><th>Losses</th><th>Draws</th><th>Points</th></tr>
@@ -163,6 +166,7 @@
           {% endfor %}
         </tbody>
       </table>
+      </div>
       <p class="lb-group-note">ℹ️ Top 2 teams from each group advance to the Semifinals.</p>
     </div>
 
@@ -174,6 +178,7 @@
     <div class="lb-group-header">
       {% if event_data.format == 'hybrid' %}Round Robin Standings{% else %}Standings{% endif %}
     </div>
+    <div class="lb-table-scroll">
     <table class="lb-table">
       <thead>
         <tr><th>Rank</th><th>Department</th><th>Wins</th><th>Losses</th><th>Draws</th><th>Points</th></tr>
@@ -197,6 +202,7 @@
         {% endfor %}
       </tbody>
     </table>
+    </div>
   </div>
   {% endif %}
 
@@ -323,4 +329,13 @@
   </div>
 {% endif %}
 
+<script>
+  /* Remove the right-edge fade mask once the user scrolls to the end of a table */
+  document.querySelectorAll('.lb-table-scroll').forEach(function (el) {
+    el.addEventListener('scroll', function () {
+      var atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+      el.classList.toggle('scrolled-end', atEnd);
+    });
+  });
+</script>
 {% endblock %}

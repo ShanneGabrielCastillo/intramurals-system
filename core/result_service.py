@@ -10,7 +10,7 @@ Never modifies Match, Score, Event, or Department records.
 """
 import logging
 
-from .models import Department, EventResult
+from .models import Department, EventResult, departments_for_season
 
 logger = logging.getLogger(__name__)
 
@@ -85,24 +85,25 @@ def save_event_results(score_instance) -> None:
         )
 
 
-def get_overall_leaderboard() -> list:
+def get_overall_leaderboard(season=None) -> list:
     """
-    Aggregate EventResult records into a ranked medal table for all 6 departments.
+    Aggregate EventResult records into a ranked medal table.
+    If season is provided, only counts medals from events in that season
+    AND only includes departments that existed during that season.
 
-    Always returns all 6 departments (zero counts for those with no medals).
     Sorted by: total_points desc → gold desc → silver desc.
-
-    Returns list of dicts:
-        [{'department': Department, 'gold': int, 'silver': int,
-          'bronze': int, 'total_points': int}, ...]
     """
-    departments = Department.objects.all()
+    departments = departments_for_season(season)
     standings = []
 
+    base_filter = {}
+    if season is not None:
+        base_filter['event__season'] = season
+
     for dept in departments:
-        gold = EventResult.objects.filter(department=dept, position=1).count()
-        silver = EventResult.objects.filter(department=dept, position=2).count()
-        bronze = EventResult.objects.filter(department=dept, position=3).count()
+        gold = EventResult.objects.filter(department=dept, position=1, **base_filter).count()
+        silver = EventResult.objects.filter(department=dept, position=2, **base_filter).count()
+        bronze = EventResult.objects.filter(department=dept, position=3, **base_filter).count()
         total_points = (
             gold * MEDAL_POINTS[1] +
             silver * MEDAL_POINTS[2] +

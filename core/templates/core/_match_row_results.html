@@ -16,9 +16,11 @@
   </td>
   <td style="text-align:center; font-size:1.1rem; font-weight:700;">
     {% if score %}{{ score.score_a|score_display }}{% else %}<span style="color:var(--secondary);">—</span>{% endif %}
+    {% if match.best_of %}<div style="font-size:0.7rem; color:var(--secondary); font-weight:400;">sets</div>{% endif %}
   </td>
   <td style="text-align:center; font-size:1.1rem; font-weight:700;">
     {% if score %}{{ score.score_b|score_display }}{% else %}<span style="color:var(--secondary);">—</span>{% endif %}
+    {% if match.best_of %}<div style="font-size:0.7rem; color:var(--secondary); font-weight:400;">sets</div>{% endif %}
   </td>
   <td>
     <div class="team">
@@ -42,15 +44,42 @@
       {% else %}
         <span style="color:#d97706; font-weight:700;">🤝 Draw</span>
       {% endif %}
+      {% if match.best_of %}
+      <!-- Collapsible set details -->
+      <div style="margin-top:0.35rem;">
+        <button type="button" class="btn-sets-toggle" onclick="
+          var d = this.nextElementSibling;
+          d.style.display = d.style.display === 'none' ? 'block' : 'none';
+          this.textContent = d.style.display === 'none' ? '▶ Sets' : '▼ Sets';
+        ">▶ Sets</button>
+        <div style="display:none; margin-top:0.4rem;">
+          {% for ms in match.sets.all %}
+          <div style="font-size:0.78rem; color:var(--secondary); line-height:1.8;">
+            Set {{ ms.set_number }}: <strong style="color:var(--text);">{{ ms.score_a }} – {{ ms.score_b }}</strong>
+          </div>
+          {% empty %}
+          <div style="font-size:0.78rem; color:var(--secondary);">No set data yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
     {% else %}
       <span style="color:var(--secondary); font-size:0.85rem; font-style:italic;">Pending</span>
     {% endif %}
   </td>
-  {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+  {% if request.user.is_authenticated and request.user.profile.role == 'admin' or request.user.is_authenticated and request.user.profile.role == 'organizer' %}
   <td>
-    <a href="{% url 'score_update' match.pk %}" class="btn-sm-primary">
-      {% if score and score.result_a != 'pending' %}Edit Score{% else %}Enter Score{% endif %}
-    </a>
+    {% if match.pk in locked_match_pks %}
+      <span class="match-locked-badge" title="Score locked — next knockout stage already generated">🔒 Locked</span>
+    {% elif match.best_of %}
+      <a href="{% url 'set_score_update' match.pk %}" class="btn-sm-primary">
+        {% if score and score.result_a != 'pending' %}Edit Sets{% else %}Enter Sets{% endif %}
+      </a>
+    {% else %}
+      <a href="{% url 'score_update' match.pk %}" class="btn-sm-primary">
+        {% if score and score.result_a != 'pending' %}Edit Score{% else %}Enter Score{% endif %}
+      </a>
+    {% endif %}
   </td>
   {% endif %}
 </tr>

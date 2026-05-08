@@ -1,0 +1,176 @@
+{% extends "core/base.html" %}
+
+{% block title %}Edit Organizer — Intramurals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Edit Organizer: {{ organizer.username }}</h1>
+    <p style="color:var(--secondary); font-size:0.9rem; margin-top:0.25rem;">Update account details and manage event assignments.</p>
+  </div>
+</div>
+
+<div class="form-card" style="max-width:800px;">
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- Name row -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label for="id_first_name">First Name <span class="label-optional">(optional)</span></label>
+        {{ form.first_name }}
+        {% if form.first_name.errors %}<ul class="form-errors">{% for e in form.first_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label for="id_last_name">Last Name <span class="label-optional">(optional)</span></label>
+        {{ form.last_name }}
+        {% if form.last_name.errors %}<ul class="form-errors">{% for e in form.last_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top:1.35rem;">
+      <label for="id_username">Username <span class="req">*</span></label>
+      {{ form.username }}
+      {% if form.username.errors %}<ul class="form-errors">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+
+    <!-- Password row -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label for="id_password">New Password <span class="label-optional">(optional)</span></label>
+        {{ form.password }}
+        <p class="form-hint" style="border:none; background:none; padding:0; font-size:0.75rem; margin-top:0.2rem;">Leave blank to keep current password.</p>
+        {% if form.password.errors %}<ul class="form-errors">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label for="id_confirm_password">Confirm New Password</label>
+        {{ form.confirm_password }}
+        {% if form.confirm_password.errors %}<ul class="form-errors">{% for e in form.confirm_password.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+    </div>
+
+    {% if form.non_field_errors %}
+      <ul class="form-errors" style="margin-top:1rem; margin-bottom:0;">
+        {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+
+    <!-- ===== GRANULAR ASSIGNMENT ===== -->
+    <div class="form-group form-section">
+      <p class="form-section-title">📋 Event Assignments</p>
+      {% if active_season %}
+      <p style="font-size:0.82rem; color:var(--primary); font-weight:600; margin-bottom:0.4rem;">
+        📅 Assigning events for: {{ active_season.name }}
+      </p>
+      {% endif %}
+      <p style="font-size:0.82rem; color:var(--secondary); margin-bottom:1rem; line-height:1.5;">
+        Check the specific combinations this organizer is allowed to manage.
+        For events without categories, check the division(s) directly.
+      </p>
+
+      {% for event in events %}
+      <div class="assign-event-block">
+        <div class="assign-event-title">
+          {{ event.name }}
+          <span class="format-badge format-{{ event.format }}" style="margin-left:0.5rem;">{{ event.get_format_display }}</span>
+        </div>
+
+        {% if event.has_categories %}
+          {# Category event: show category × division grid #}
+          <div class="assign-grid">
+            {% for cat in event.categories.all %}
+              {% if cat.category_type == 'mixed' %}
+                {% with key=event.pk|stringformat:"s"|add:"_"|add:cat.category_type|add:"_" %}
+                {% with taken_key=event.pk|stringformat:"s"|add:"_"|add:cat.category_type|add:"__taken" %}
+                <label class="assign-checkbox {% if key in existing_assignments %}assign-checked{% elif taken_key in taken_slots %}assign-taken{% endif %}">
+                  <input type="checkbox" name="assign_{{ event.pk }}_{{ cat.category_type }}_"
+                         {% if key in existing_assignments %}checked{% endif %}
+                         {% if taken_key in taken_slots %}disabled{% endif %}>
+                  <span>🔀 Mixed
+                    {% if taken_key in taken_slots %}<small style="color:var(--danger); font-weight:400;"> (taken)</small>{% endif %}
+                  </span>
+                </label>
+                {% endwith %}{% endwith %}
+              {% else %}
+                {% with key_m=event.pk|stringformat:"s"|add:"_"|add:cat.category_type|add:"_men" %}
+                {% with taken_m=event.pk|stringformat:"s"|add:"_"|add:cat.category_type|add:"_men_taken" %}
+                <label class="assign-checkbox {% if key_m in existing_assignments %}assign-checked{% elif taken_m in taken_slots %}assign-taken{% endif %}">
+                  <input type="checkbox" name="assign_{{ event.pk }}_{{ cat.category_type }}_men"
+                         {% if key_m in existing_assignments %}checked{% endif %}
+                         {% if taken_m in taken_slots %}disabled{% endif %}>
+                  <span>
+                    {% if cat.category_type == 'singles' %}👤{% else %}👥{% endif %}
+                    {{ cat.get_category_type_display }} / ♂ Men
+                    {% if taken_m in taken_slots %}<small style="color:var(--danger); font-weight:400;"> (taken)</small>{% endif %}
+                  </span>
+                </label>
+                {% endwith %}{% endwith %}
+                {% with key_w=event.pk|stringformat:"s"|add:"_"|add:cat.category_type|add:"_women" %}
+                {% with taken_w=event.pk|stringformat:"s"|add:"_"|add:cat.category_type|add:"_women_taken" %}
+                <label class="assign-checkbox {% if key_w in existing_assignments %}assign-checked{% elif taken_w in taken_slots %}assign-taken{% endif %}">
+                  <input type="checkbox" name="assign_{{ event.pk }}_{{ cat.category_type }}_women"
+                         {% if key_w in existing_assignments %}checked{% endif %}
+                         {% if taken_w in taken_slots %}disabled{% endif %}>
+                  <span>
+                    {% if cat.category_type == 'singles' %}👤{% else %}👥{% endif %}
+                    {{ cat.get_category_type_display }} / ♀ Women
+                    {% if taken_w in taken_slots %}<small style="color:var(--danger); font-weight:400;"> (taken)</small>{% endif %}
+                  </span>
+                </label>
+                {% endwith %}{% endwith %}
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="assign-grid">
+            {% if event.division_type == 'men' or event.division_type == 'both' %}
+            {% with key_m=event.pk|stringformat:"s"|add:"__men" %}
+            {% with taken_m=event.pk|stringformat:"s"|add:"__men_taken" %}
+            <label class="assign-checkbox {% if key_m in existing_assignments %}assign-checked{% elif taken_m in taken_slots %}assign-taken{% endif %}">
+              <input type="checkbox" name="assign_{{ event.pk }}__men"
+                     {% if key_m in existing_assignments %}checked{% endif %}
+                     {% if taken_m in taken_slots %}disabled{% endif %}>
+              <span>♂ Men's Division
+                {% if taken_m in taken_slots %}<small style="color:var(--danger); font-weight:400;"> (taken)</small>{% endif %}
+              </span>
+            </label>
+            {% endwith %}{% endwith %}
+            {% endif %}
+            {% if event.division_type == 'women' or event.division_type == 'both' %}
+            {% with key_w=event.pk|stringformat:"s"|add:"__women" %}
+            {% with taken_w=event.pk|stringformat:"s"|add:"__women_taken" %}
+            <label class="assign-checkbox {% if key_w in existing_assignments %}assign-checked{% elif taken_w in taken_slots %}assign-taken{% endif %}">
+              <input type="checkbox" name="assign_{{ event.pk }}__women"
+                     {% if key_w in existing_assignments %}checked{% endif %}
+                     {% if taken_w in taken_slots %}disabled{% endif %}>
+              <span>♀ Women's Division
+                {% if taken_w in taken_slots %}<small style="color:var(--danger); font-weight:400;"> (taken)</small>{% endif %}
+              </span>
+            </label>
+            {% endwith %}{% endwith %}
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p style="color:var(--secondary); font-size:0.85rem;">
+        {% if active_season %}No events in the active season yet.{% else %}No active season found. Create and activate a season first.{% endif %}
+      </p>
+      {% endfor %}
+    </div>
+
+    <div class="form-actions" style="margin-top:1.5rem;">
+      <button type="submit" class="btn-primary">Save Changes</button>
+      <a href="{% url 'organizer_list' %}" class="btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<style>
+  @media (max-width: 540px) {
+    .form-card form > div[style*="grid-template-columns"] {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+{% endblock %}

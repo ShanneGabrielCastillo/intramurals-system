@@ -23,3 +23,11 @@ def score_display(value):
         return str(int(f))
     # Has a fractional part — strip trailing zeros
     return f'{f:g}'
+
+
+@register.filter
+def get_item(dictionary, key):
+    """Lookup a dict value by variable key in templates: {{ mydict|get_item:variable }}"""
+    if isinstance(dictionary, dict):
+        return dictionary.get(key, [])
+    return []

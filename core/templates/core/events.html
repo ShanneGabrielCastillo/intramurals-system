@@ -1,11 +1,12 @@
 {% extends "core/base.html" %}
+{% load score_filters %}
 
 {% block title %}Events — Intramurals{% endblock %}
 
 {% block content %}
 <div class="page-header">
   <h1>Events</h1>
-  {% if request.user.profile.role == 'admin' %}
+  {% if request.user.is_authenticated and request.user.profile.role == 'admin' %}
     <a href="{% url 'event_create' %}" class="btn-primary">+ Add Event</a>
   {% endif %}
 </div>
@@ -15,10 +16,10 @@
     <thead>
       <tr>
         <th>Event Name</th>
-        <th class="hide-mobile">Description</th>
         <th>Format</th>
+        <th>Organizer</th>
         <th>Created Date</th>
-        {% if request.user.profile.role == 'admin' %}
+        {% if request.user.is_authenticated and request.user.profile.role == 'admin' %}
           <th>Actions</th>
         {% endif %}
       </tr>
@@ -27,10 +28,25 @@
       {% for event in events %}
       <tr>
         <td>{{ event.name }}</td>
-        <td class="hide-mobile">{{ event.description|default:"—" }}</td>
         <td><span class="format-badge format-{{ event.format }}">{{ event.get_format_display }}</span></td>
+        <td>
+          {% with entries=organizer_labels|get_item:event.pk %}
+          {% if entries %}
+            {% for name, label in entries %}
+            <div style="font-size:0.82rem; line-height:1.8;">
+              <strong>{{ name }}</strong>
+              {% if label != event.name %}
+                <span class="assign-label-badge" style="margin-left:0.3rem;">{{ label }}</span>
+              {% endif %}
+            </div>
+            {% endfor %}
+          {% else %}
+            <span style="color:var(--secondary); font-size:0.85rem; font-style:italic;">Unassigned</span>
+          {% endif %}
+          {% endwith %}
+        </td>
         <td>{{ event.created_at|date:"M d, Y" }}</td>
-        {% if request.user.profile.role == 'admin' %}
+        {% if request.user.is_authenticated and request.user.profile.role == 'admin' %}
         <td>
           <div class="actions-cell">
             <a href="{% url 'event_update' event.pk %}" class="btn-sm-secondary">Edit</a>
@@ -45,8 +61,8 @@
       </tr>
       {% empty %}
       <tr>
-        <td colspan="{% if request.user.profile.role == 'admin' %}5{% else %}4{% endif %}">
-          <div class="empty-state">No events yet. {% if request.user.profile.role == 'admin' %}<a href="{% url 'event_create' %}">Add the first event.</a>{% endif %}</div>
+        <td colspan="{% if request.user.is_authenticated and request.user.profile.role == 'admin' %}5{% else %}4{% endif %}">
+          <div class="empty-state">No events yet. {% if request.user.is_authenticated and request.user.profile.role == 'admin' %}<a href="{% url 'event_create' %}">Add the first event.</a>{% endif %}</div>
         </td>
       </tr>
       {% endfor %}

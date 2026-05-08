@@ -5,8 +5,9 @@ from .models import UserProfile, Department, Event, Match, Score, EventResult
 
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ('display_order', 'abbreviation', 'name', 'logo_preview')
+    list_display = ('display_order', 'abbreviation', 'name', 'group', 'created_season', 'logo_preview')
     list_display_links = ('abbreviation', 'name')
+    list_filter = ('group', 'created_season')
     ordering = ('display_order',)
     readonly_fields = ('logo_preview',)
 

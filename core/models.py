@@ -6,16 +6,51 @@ class UserProfile(models.Model):
     ROLE_CHOICES = [
         ('admin', 'Admin'),
         ('organizer', 'Organizer'),
-        ('student', 'Student'),
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='organizer')
 
     def __str__(self):
         return f"{self.user.username} ({self.role})"
 
 
+class Season(models.Model):
+    """
+    Represents one intramural year/season.
+    Only ONE season should be active at a time.
+    All events belong to a season, keeping historical data isolated.
+    """
+    name = models.CharField(max_length=100, help_text='e.g. "2026 Intramurals"')
+    year = models.PositiveIntegerField()
+    is_active = models.BooleanField(
+        default=False,
+        help_text='Only one season should be active at a time. '
+                  'Setting this active will deactivate all others.',
+    )
+
+    class Meta:
+        ordering = ['-year', '-pk']
+
+    def save(self, *args, **kwargs):
+        # Enforce single active season: deactivate all others when this is set active
+        if self.is_active:
+            Season.objects.exclude(pk=self.pk).update(is_active=False)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name} ({'Active' if self.is_active else str(self.year)})"
+
+    @classmethod
+    def get_active(cls):
+        return cls.objects.filter(is_active=True).first()
+
+
 class Department(models.Model):
+    GROUP_CHOICES = [
+        ('A', 'Group A'),
+        ('B', 'Group B'),
+    ]
+
     name = models.CharField(max_length=100)
     abbreviation = models.CharField(max_length=10)
     display_order = models.PositiveIntegerField()
@@ -25,12 +60,61 @@ class Department(models.Model):
         blank=True,
         help_text='Upload department logo (PNG or JPG recommended)',
     )
+    group = models.CharField(
+        max_length=1,
+        choices=GROUP_CHOICES,
+        null=True,
+        blank=True,
+        default=None,
+        help_text='Assign to Group A or Group B for Group Knockout events. '
+                  'Leave blank if this department does not participate in Group Knockout.',
+    )
+    created_season = models.ForeignKey(
+        'Season',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='departments',
+        help_text='The first season this department officially exists in. '
+                  'Auto-set to the active season when the department is created. '
+                  'The department will not appear in seasons before this one.',
+    )
 
     class Meta:
         ordering = ['display_order']
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        # Auto-assign created_season to the active season on first creation
+        if self._state.adding and self.created_season_id is None:
+            active = Season.get_active()
+            if active:
+                self.created_season = active
+        super().save(*args, **kwargs)
+
+
+def departments_for_season(season):
+    """
+    Return a queryset of departments that existed during the given season.
+
+    Visibility rule:
+      - created_season year <= season year  (or created_season is NULL)
+
+    A department created in 2027 is invisible in 2026.
+    Deleted departments are gone from the DB entirely — past match FKs
+    are protected by Match.team_a/team_b using on_delete=PROTECT, so
+    deletion is only allowed after current-season matches are removed first.
+
+    If season is None, returns all departments.
+    """
+    if season is None:
+        return Department.objects.all()
+    return Department.objects.filter(
+        models.Q(created_season__year__lte=season.year) |
+        models.Q(created_season__isnull=True)
+    )
 
 
 class Event(models.Model):
@@ -44,7 +128,6 @@ class Event(models.Model):
         ('both', 'Both Divisions'),
     ]
     name = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     format = models.CharField(
         max_length=20,
@@ -61,6 +144,22 @@ class Event(models.Model):
         default=False,
         help_text='Enable for sports with multiple categories (e.g. Badminton: Singles, Doubles, Mixed). '
                   'When enabled, standings are shown per category + division.',
+    )
+    organizer = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_events',
+        help_text='Organizer assigned to manage this event.',
+    )
+    season = models.ForeignKey(
+        'Season',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='events',
+        help_text='Season this event belongs to.',
     )
 
     def __str__(self):
@@ -133,6 +232,11 @@ class Match(models.Model):
         blank=True,
         related_name='matches',
     )
+    best_of = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text='Number of sets (e.g. 3, 5, 7). Leave blank for normal scoring.',
+    )
 
     class Meta:
         ordering = ['date_time']
@@ -140,6 +244,25 @@ class Match(models.Model):
 
     def __str__(self):
         return f"{self.team_a} vs {self.team_b} — {self.event}"
+
+
+class MatchSet(models.Model):
+    """
+    Stores the score for one individual set within a match.
+    Only used when match.best_of is set.
+    The match's overall Score (sets won) is computed from these records.
+    """
+    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='sets')
+    set_number = models.PositiveIntegerField()
+    score_a = models.PositiveIntegerField(default=0, help_text='Points scored by Team A in this set')
+    score_b = models.PositiveIntegerField(default=0, help_text='Points scored by Team B in this set')
+
+    class Meta:
+        ordering = ['set_number']
+        unique_together = [('match', 'set_number')]
+
+    def __str__(self):
+        return f"Set {self.set_number}: {self.match.team_a.abbreviation} {self.score_a}–{self.score_b} {self.match.team_b.abbreviation}"
 
 
 class Score(models.Model):
@@ -179,7 +302,72 @@ from django.dispatch import receiver
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(user=instance, role='student')
+        UserProfile.objects.create(user=instance, role='organizer')
+
+
+class OrganizerAssignment(models.Model):
+    """
+    Granular assignment of an organizer to a specific event + category + division.
+    An organizer can only manage matches that match ALL three criteria.
+
+    category: None means "all categories" (for non-category events)
+    division: None means "all divisions"
+    """
+    DIVISION_CHOICES = [
+        ('men', 'Men'),
+        ('women', 'Women'),
+        ('mixed', 'Mixed'),
+    ]
+    CATEGORY_CHOICES = [
+        ('singles', 'Singles'),
+        ('doubles', 'Doubles'),
+        ('mixed', 'Mixed'),
+    ]
+    organizer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='assignments',
+    )
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='organizer_assignments',
+    )
+    category_type = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        null=True,
+        blank=True,
+        help_text='Leave blank to assign all categories of this event.',
+    )
+    division = models.CharField(
+        max_length=10,
+        choices=DIVISION_CHOICES,
+        null=True,
+        blank=True,
+        help_text='Leave blank to assign all divisions of this event.',
+    )
+
+    class Meta:
+        unique_together = [
+            ('organizer', 'event', 'category_type', 'division'),  # one organizer per combination
+            ('event', 'category_type', 'division'),               # only ONE organizer per event+cat+div
+        ]
+        ordering = ['event__name', 'category_type', 'division']
+
+    def label(self):
+        """Human-readable label like 'Badminton (Singles - Men)'."""
+        parts = []
+        if self.category_type:
+            parts.append(self.get_category_type_display())
+        if self.division:
+            parts.append(self.get_division_display())
+        if parts:
+            return f"{self.event.name} ({' - '.join(parts)})"
+        return self.event.name
+
+    def __str__(self):
+        return f"{self.organizer.username} → {self.label()}"
 
 
 # --- EventResult ---

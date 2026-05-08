@@ -1,0 +1,63 @@
+{% extends "core/base.html" %}
+
+{% block title %}Seasons — Intramurals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Seasons</h1>
+    <p style="color:var(--secondary); font-size:0.9rem; margin-top:0.25rem;">Manage intramural seasons. Only one season can be active at a time.</p>
+  </div>
+  <a href="{% url 'season_create' %}" class="btn-primary">+ New Season</a>
+</div>
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>Season Name</th>
+        <th>Year</th>
+        <th>Status</th>
+        <th>Events</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for season in seasons %}
+      <tr {% if season.is_active %}class="rank-gold"{% endif %}>
+        <td><strong>{{ season.name }}</strong></td>
+        <td>{{ season.year }}</td>
+        <td>
+          {% if season.is_active %}
+            <span class="dash-badge dash-badge-green">★ Active</span>
+          {% else %}
+            <span style="color:var(--secondary); font-size:0.85rem;">Past</span>
+          {% endif %}
+        </td>
+        <td>{{ season.events.count }} event{{ season.events.count|pluralize }}</td>
+        <td>
+          <div class="actions-cell">
+            <a href="{% url 'season_update' season.pk %}" class="btn-sm-secondary">Edit</a>
+            <form method="post" action="{% url 'season_delete' season.pk %}" style="display:inline;"
+                  data-confirm-delete="Delete season &quot;{{ season.name }}&quot;? This cannot be undone.">
+              {% csrf_token %}
+              <button type="submit" class="btn-sm-danger">Delete</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5">
+          <div class="empty-state">No seasons yet. <a href="{% url 'season_create' %}">Create the first one.</a></div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card" style="margin-top:1.5rem; font-size:0.85rem; color:var(--secondary);">
+  <strong>How seasons work:</strong> Each event belongs to one season. When you create a new event, it is automatically assigned to the active season. Use the season selector in the navbar to view data from past seasons.
+</div>
+{% endblock %}

@@ -8,14 +8,15 @@
     <h1>Schedule</h1>
     <p style="color:var(--secondary); font-size:0.9rem; margin-top:0.25rem;">Matches grouped by event and category.</p>
   </div>
-  {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+  {% if request.user.is_authenticated and request.user.profile.role == 'admin' or request.user.is_authenticated and request.user.profile.role == 'organizer' %}
     {% if not has_auto_events %}
       <a href="{% url 'match_create' %}" class="btn-primary">+ Add Match</a>
     {% endif %}
   {% endif %}
 </div>
 
-<!-- Search -->
+<!-- Search — hidden for organizers (they see only their assigned matches) -->
+{% if not is_organizer %}
 <form class="search-form" method="get" action="{% url 'match_list' %}">
   <input class="search-input" type="text" name="q" placeholder="Search by event, team, or venue…"
          value="{{ query|default:'' }}">
@@ -24,6 +25,7 @@
     <a href="{% url 'match_list' %}" class="btn-secondary">Clear</a>
   {% endif %}
 </form>
+{% endif %}
 
 {% if event_groups %}
 
@@ -32,10 +34,6 @@
 
     <!-- ===== EVENT HEADER ===== -->
     <div class="sched-event-header">
-      <span class="sched-event-icon">
-        {% if eg.event.format == 'group_knockout' %}🏀
-        {% else %}⚽{% endif %}
-      </span>
       <div>
         <h2 class="sched-event-title">{{ eg.event.name }}</h2>
         <span class="format-badge format-{{ eg.event.format }}">{{ eg.event.get_format_display }}</span>
@@ -71,8 +69,8 @@
                   <th>Team A</th>
                   <th>Team B</th>
                   <th>Date &amp; Time</th>
-                  <th class="hide-mobile">Venue</th>
-                  {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+                  <th>Venue</th>
+                  {% if request.user.is_authenticated and request.user.profile.role == 'admin' or request.user.is_authenticated and request.user.profile.role == 'organizer' %}
                     <th>Actions</th>
                   {% endif %}
                 </tr>
@@ -115,8 +113,8 @@
                 <th>Team A</th>
                 <th>Team B</th>
                 <th>Date &amp; Time</th>
-                <th class="hide-mobile">Venue</th>
-                {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+                <th>Venue</th>
+                {% if request.user.is_authenticated and request.user.profile.role == 'admin' or request.user.is_authenticated and request.user.profile.role == 'organizer' %}
                   <th>Actions</th>
                 {% endif %}
               </tr>

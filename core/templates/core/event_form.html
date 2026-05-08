@@ -4,49 +4,46 @@
 
 {% block content %}
 <div class="page-header">
-  <h1>{% if form.instance.pk %}Edit Event{% else %}Add Event{% endif %}</h1>
+  <div>
+    <h1>{% if form.instance.pk %}Edit Event{% else %}Add Event{% endif %}</h1>
+    <p style="color:var(--secondary); font-size:0.9rem; margin-top:0.25rem;">
+      {% if form.instance.pk %}Update event settings. Changing format or divisions will regenerate all matches.{% else %}Configure the event format, divisions, and categories.{% endif %}
+    </p>
+  </div>
 </div>
 
 <div class="form-card">
   <form method="post" id="event-form">
     {% csrf_token %}
 
-    <!-- Name -->
+    <!-- Event Name -->
     <div class="form-group">
-      <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+      <label for="{{ form.name.id_for_label }}">Event Name <span class="req">*</span></label>
       {{ form.name }}
       {% if form.name.errors %}<ul class="form-errors">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
     </div>
 
-    <!-- Description -->
-    <div class="form-group">
-      <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
-      {{ form.description }}
-      {% if form.description.errors %}<ul class="form-errors">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-    </div>
-
-    <!-- Format -->
-    <div class="form-group">
-      <label for="{{ form.format.id_for_label }}">{{ form.format.label }}</label>
-      {{ form.format }}
-      {% if form.format.errors %}<ul class="form-errors">{% for e in form.format.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-    </div>
-
-    <!-- Division Type -->
-    <div class="form-group">
-      <label for="{{ form.division_type.id_for_label }}">{{ form.division_type.label }}</label>
-      {{ form.division_type }}
-      {% if form.division_type.errors %}<ul class="form-errors">{% for e in form.division_type.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-    </div>
-
-    <!-- Enable Categories checkbox -->
-    <div class="form-group">
-      <div class="checkbox-row">
-        {{ form.has_categories }}
-        <label for="{{ form.has_categories.id_for_label }}" class="checkbox-label">
-          Enable Categories
-        </label>
+    <!-- Format + Division side by side on desktop -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label for="{{ form.format.id_for_label }}">Tournament Format <span class="req">*</span></label>
+        {{ form.format }}
+        {% if form.format.errors %}<ul class="form-errors">{% for e in form.format.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
       </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label for="{{ form.division_type.id_for_label }}">Divisions <span class="req">*</span></label>
+        {{ form.division_type }}
+        {% if form.division_type.errors %}<ul class="form-errors">{% for e in form.division_type.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+    </div>
+
+    <!-- Categories checkbox -->
+    <div class="form-group" style="margin-top:1.35rem;">
+      <label style="margin-bottom:0.45rem;">Categories</label>
+      <label class="checkbox-row" for="{{ form.has_categories.id_for_label }}" style="cursor:pointer;">
+        {{ form.has_categories }}
+        <span class="checkbox-label">Enable Categories (Singles, Doubles, Mixed)</span>
+      </label>
       <p id="categories-hint" class="form-hint" style="display:none;">
         ✅ Three categories will be auto-created: <strong>Singles</strong>, <strong>Doubles</strong>, and <strong>Mixed</strong>.
         Matches will be generated separately for each category and division.
@@ -61,8 +58,7 @@
     {% endif %}
 
     {% if needs_confirm %}
-    <!-- Confirmation warning shown when scored matches exist and structure is changing -->
-    <div class="form-hint" style="background:#fef3c7; border-color:#d97706; color:#92400e; margin-bottom:1rem;">
+    <div class="form-hint form-hint-warning" style="margin-bottom:1rem;">
       ⚠️ <strong>Warning:</strong> This event has scored matches.
       Saving will <strong>permanently delete all existing matches and results</strong> for this event
       and regenerate them based on the new settings.
@@ -74,18 +70,22 @@
 
     <div class="form-actions">
       <button type="submit" class="btn-primary">
-        {% if needs_confirm %}
-          ⚠️ Save &amp; Regenerate
-        {% elif form.instance.pk %}
-          Save Changes
-        {% else %}
-          Create Event
-        {% endif %}
+        {% if needs_confirm %}⚠️ Save &amp; Regenerate
+        {% elif form.instance.pk %}Save Changes
+        {% else %}Create Event{% endif %}
       </button>
       <a href="{% url 'event_list' %}" class="btn-secondary">Cancel</a>
     </div>
   </form>
 </div>
+
+<style>
+  @media (max-width: 540px) {
+    .form-card form > div[style*="grid-template-columns:1fr 1fr"] {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
 
 <script>
   (function () {
@@ -93,7 +93,7 @@
     const hint = document.getElementById('categories-hint');
     function toggle() { hint.style.display = cb.checked ? 'block' : 'none'; }
     cb.addEventListener('change', toggle);
-    toggle(); // run on page load (handles edit mode where checkbox may already be checked)
+    toggle();
   })();
 </script>
 {% endblock %}

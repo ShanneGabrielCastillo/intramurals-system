@@ -12,13 +12,16 @@
 <nav class="navbar">
   <a class="navbar-brand" href="{% url 'dashboard' %}">🏆 Intramurals</a>
 
+  <!-- Desktop nav links (hidden on mobile) -->
   <ul class="navbar-links" id="navLinks">
+    {% if not viewing_past_season %}
     <li>
       <a href="{% url 'dashboard' %}"
          class="{% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'home' %}active{% endif %}">
         Dashboard
       </a>
     </li>
+    {% endif %}
     <li>
       <a href="{% url 'department_list' %}"
          class="{% if request.resolver_match.url_name == 'department_list' %}active{% endif %}">
@@ -31,12 +34,14 @@
         Events
       </a>
     </li>
+    {% if not viewing_past_season %}
     <li>
       <a href="{% url 'match_list' %}"
          class="{% if request.resolver_match.url_name == 'match_list' or request.resolver_match.url_name == 'match_create' or request.resolver_match.url_name == 'match_update' %}active{% endif %}">
         Schedule
       </a>
     </li>
+    {% endif %}
     <li>
       <a href="{% url 'results_list' %}"
          class="{% if request.resolver_match.url_name == 'results_list' or request.resolver_match.url_name == 'score_update' %}active{% endif %}">
@@ -55,24 +60,162 @@
         Overall Leaderboard
       </a>
     </li>
+    {% if request.user.is_authenticated and request.user.profile.role == 'admin' and not viewing_past_season %}
+    <li>
+      <a href="{% url 'organizer_list' %}"
+         class="{% if request.resolver_match.url_name == 'organizer_list' or request.resolver_match.url_name == 'organizer_create' %}active{% endif %}">
+        Organizers
+      </a>
+    </li>
+    {% endif %}
+    {% if request.user.is_authenticated and request.user.profile.role == 'admin' %}
+    <li>
+      <a href="{% url 'season_list' %}"
+         class="{% if request.resolver_match.url_name == 'season_list' or request.resolver_match.url_name == 'season_create' or request.resolver_match.url_name == 'season_update' %}active{% endif %}">
+        Seasons
+      </a>
+    </li>
+    {% endif %}
   </ul>
 
   <div class="navbar-right" id="navRight">
-    <span class="navbar-user">
-      <span>{{ request.user.get_full_name|default:request.user.username }}</span>
-      &nbsp;·&nbsp;{{ request.user.profile.role|capfirst }}
-    </span>
+
+    <!-- Season selector — desktop only -->
+    {% if all_seasons %}
+    <select class="season-select" title="Select Season" onchange="
+      var pk = this.value;
+      var base = '{% url 'season_switch' 0 %}'.replace('/0/', '/' + pk + '/');
+      window.location.href = base + '?next=' + encodeURIComponent(window.location.pathname);
+    ">
+      {% for s in all_seasons %}
+        <option value="{{ s.pk }}" {% if selected_season and selected_season.pk == s.pk %}selected{% endif %}>
+          📅 {{ s.name }}{% if s.is_active %} ★{% endif %}
+        </option>
+      {% endfor %}
+    </select>
+    {% endif %}
+
+    {% if request.user.is_authenticated %}
+    <!-- Dark mode toggle -->
     <button class="btn-toggle-dark" id="darkToggle" title="Toggle dark mode" aria-label="Toggle dark mode">☀️</button>
-    <form class="logout-form" method="post" action="{% url 'logout' %}">
-      {% csrf_token %}
-      <button type="submit" class="btn-logout">Logout</button>
-    </form>
+
+    <!-- Profile dropdown — always visible, even on mobile -->
+    <div class="profile-dropdown" id="profileDropdown">
+      <button class="profile-btn" id="profileBtn" aria-label="Profile menu" aria-expanded="false">
+        👤
+      </button>
+      <div class="profile-menu" id="profileMenu">
+        <div class="profile-menu-header">
+          <div class="profile-menu-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+          <div class="profile-menu-role">{{ request.user.profile.role|capfirst }}</div>
+        </div>
+        <div class="profile-menu-divider"></div>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="profile-menu-logout">Logout</button>
+        </form>
+      </div>
+    </div>
+
+    {% else %}
+    <span class="viewer-badge">👁 Viewer</span>
+    <button class="btn-toggle-dark" id="darkToggle" title="Toggle dark mode" aria-label="Toggle dark mode">☀️</button>
+    <a href="{% url 'login' %}" class="btn-logout" style="background:rgba(79,110,247,0.8); text-decoration:none; padding:0.35rem 0.65rem; font-size:0.82rem;">Sign In</a>
+    {% endif %}
+
   </div>
 
-  <button class="navbar-hamburger" id="hamburger" aria-label="Toggle menu">☰</button>
+  <!-- Hamburger — mobile only, after profile icon -->
+  <button class="navbar-hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+    <span class="hamburger-bar"></span>
+    <span class="hamburger-bar"></span>
+    <span class="hamburger-bar"></span>
+  </button>
 </nav>
 
+<!-- ===== MOBILE DRAWER OVERLAY ===== -->
+<div class="drawer-overlay" id="drawerOverlay" aria-hidden="true"></div>
+
+<!-- ===== MOBILE SLIDE-OUT DRAWER ===== -->
+<aside class="mobile-drawer" id="mobileDrawer" aria-label="Navigation menu" aria-hidden="true">
+
+  <!-- Drawer header -->
+  <div class="drawer-header">
+    <span class="drawer-title">🏆 Intramurals</span>
+    <button class="drawer-close" id="drawerClose" aria-label="Close menu">✕</button>
+  </div>
+
+  <!-- Season selector inside drawer -->
+  {% if all_seasons %}
+  <div class="drawer-season">
+    <label class="drawer-season-label">📅 Season</label>
+    <select class="drawer-season-select" onchange="
+      var pk = this.value;
+      var base = '{% url 'season_switch' 0 %}'.replace('/0/', '/' + pk + '/');
+      window.location.href = base + '?next=' + encodeURIComponent(window.location.pathname);
+    ">
+      {% for s in all_seasons %}
+        <option value="{{ s.pk }}" {% if selected_season and selected_season.pk == s.pk %}selected{% endif %}>
+          {{ s.name }}{% if s.is_active %} ★{% endif %}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  {% endif %}
+
+  <!-- Nav links -->
+  <nav class="drawer-nav">
+    {% if not viewing_past_season %}
+    <a href="{% url 'dashboard' %}" class="drawer-link {% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'home' %}drawer-link-active{% endif %}">
+      <span class="drawer-link-icon">🏠</span> Dashboard
+    </a>
+    {% endif %}
+    <a href="{% url 'department_list' %}" class="drawer-link {% if request.resolver_match.url_name == 'department_list' %}drawer-link-active{% endif %}">
+      <span class="drawer-link-icon">🏛️</span> Departments
+    </a>
+    <a href="{% url 'event_list' %}" class="drawer-link {% if request.resolver_match.url_name == 'event_list' or request.resolver_match.url_name == 'event_create' or request.resolver_match.url_name == 'event_update' %}drawer-link-active{% endif %}">
+      <span class="drawer-link-icon">📅</span> Events
+    </a>
+    {% if not viewing_past_season %}
+    <a href="{% url 'match_list' %}" class="drawer-link {% if request.resolver_match.url_name == 'match_list' or request.resolver_match.url_name == 'match_create' or request.resolver_match.url_name == 'match_update' %}drawer-link-active{% endif %}">
+      <span class="drawer-link-icon">🗓️</span> Schedule
+    </a>
+    {% endif %}
+    <a href="{% url 'results_list' %}" class="drawer-link {% if request.resolver_match.url_name == 'results_list' or request.resolver_match.url_name == 'score_update' %}drawer-link-active{% endif %}">
+      <span class="drawer-link-icon">✅</span> Results
+    </a>
+    <a href="{% url 'leaderboard' %}" class="drawer-link {% if request.resolver_match.url_name == 'leaderboard' %}drawer-link-active{% endif %}">
+      <span class="drawer-link-icon">📊</span> Event Standings
+    </a>
+    <a href="{% url 'overall_leaderboard' %}" class="drawer-link {% if request.resolver_match.url_name == 'overall_leaderboard' %}drawer-link-active{% endif %}">
+      <span class="drawer-link-icon">🏆</span> Overall Leaderboard
+    </a>
+    {% if request.user.is_authenticated and request.user.profile.role == 'admin' and not viewing_past_season %}
+    <div class="drawer-divider"></div>
+    <span class="drawer-section-label">Admin</span>
+    <a href="{% url 'organizer_list' %}" class="drawer-link {% if request.resolver_match.url_name == 'organizer_list' or request.resolver_match.url_name == 'organizer_create' %}drawer-link-active{% endif %}">
+      <span class="drawer-link-icon">👥</span> Organizers
+    </a>
+    {% endif %}
+    {% if request.user.is_authenticated and request.user.profile.role == 'admin' %}
+    {% if not viewing_past_season %}{# divider already added above #}{% else %}
+    <div class="drawer-divider"></div>
+    <span class="drawer-section-label">Admin</span>
+    {% endif %}
+    <a href="{% url 'season_list' %}" class="drawer-link {% if request.resolver_match.url_name == 'season_list' or request.resolver_match.url_name == 'season_create' or request.resolver_match.url_name == 'season_update' %}drawer-link-active{% endif %}">
+      <span class="drawer-link-icon">🗂️</span> Seasons
+    </a>
+    {% endif %}
+  </nav>
+
+</aside>
+
 <main class="main-content">
+  {% if viewing_past_season %}
+  <div class="past-season-banner">
+    🗂 Viewing past season: <strong>{{ selected_season.name }}</strong> — Read-Only Mode
+  </div>
+  {% endif %}
   {% if messages %}
     <div class="toast-container" id="toastContainer">
       {% for message in messages %}
@@ -145,16 +288,132 @@
     });
   })();
 
-  // Hamburger menu
+  // Profile dropdown toggle
   (function () {
-    var hamburger = document.getElementById('hamburger');
-    var navLinks = document.getElementById('navLinks');
-    var navRight = document.getElementById('navRight');
+    var btn = document.getElementById('profileBtn');
+    var menu = document.getElementById('profileMenu');
+    if (!btn) return;
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = menu.classList.toggle('profile-menu-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    // Close when clicking anywhere outside
+    document.addEventListener('click', function () {
+      menu.classList.remove('profile-menu-open');
+      btn.setAttribute('aria-expanded', 'false');
+    });
+
+    // Prevent clicks inside menu from closing it
+    menu.addEventListener('click', function (e) { e.stopPropagation(); });
+  })();
+
+  // Hamburger / mobile drawer
+  (function () {
+    var hamburger   = document.getElementById('hamburger');
+    var drawer      = document.getElementById('mobileDrawer');
+    var overlay     = document.getElementById('drawerOverlay');
+    var closeBtn    = document.getElementById('drawerClose');
+
+    function openDrawer() {
+      drawer.classList.add('drawer-open');
+      overlay.classList.add('drawer-overlay-visible');
+      hamburger.classList.add('hamburger-active');
+      hamburger.setAttribute('aria-expanded', 'true');
+      hamburger.setAttribute('aria-label', 'Close menu');
+      drawer.setAttribute('aria-hidden', 'false');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      drawer.classList.remove('drawer-open');
+      overlay.classList.remove('drawer-overlay-visible');
+      hamburger.classList.remove('hamburger-active');
+      hamburger.setAttribute('aria-expanded', 'false');
+      hamburger.setAttribute('aria-label', 'Open menu');
+      drawer.setAttribute('aria-hidden', 'true');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
 
     hamburger.addEventListener('click', function () {
-      navLinks.classList.toggle('open');
-      navRight.classList.toggle('open');
+      if (drawer.classList.contains('drawer-open')) {
+        closeDrawer();
+      } else {
+        openDrawer();
+      }
     });
+
+    closeBtn.addEventListener('click', closeDrawer);
+    overlay.addEventListener('click', closeDrawer);
+
+    // Close on nav link click
+    drawer.querySelectorAll('.drawer-link').forEach(function (link) {
+      link.addEventListener('click', closeDrawer);
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeDrawer();
+    });
+  })();
+
+  // Real-time result notifications (AJAX polling every 5 seconds)
+  // Works for ALL users: admin, organizer, and viewer
+  (function () {
+    var lastSeenId = null;
+    var pollUrl = '{% url "latest_result_api" %}';
+
+    function showToast(msg, type) {
+      var container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.querySelector('.main-content').prepend(container);
+      }
+      var toast = document.createElement('div');
+      toast.className = 'toast toast-' + (type || 'success');
+      toast.setAttribute('role', 'alert');
+      toast.innerHTML =
+        '<span class="toast-icon">' + (type === 'info' ? 'ℹ️' : '✅') + '</span>' +
+        '<span class="toast-text">' + msg + '</span>' +
+        '<button class="toast-close" onclick="this.parentElement.remove()" aria-label="Dismiss">×</button>';
+      container.appendChild(toast);
+      setTimeout(function () {
+        toast.style.transition = 'opacity 0.4s, transform 0.4s';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(110%)';
+        setTimeout(function () { toast.remove(); }, 400);
+      }, 6000);
+    }
+
+    function poll() {
+      fetch(pollUrl)
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data.has_result) return;
+          if (lastSeenId === null) {
+            // First load — just record the current latest, don't show toast
+            lastSeenId = data.score_id;
+            return;
+          }
+          if (data.score_id !== lastSeenId) {
+            lastSeenId = data.score_id;
+            showToast(data.message, data.type);
+          }
+        })
+        .catch(function () { /* silently ignore network errors */ });
+    }
+
+    // Start polling after 2s delay, then every 5s
+    setTimeout(function () {
+      poll();
+      setInterval(poll, 5000);
+    }, 2000);
   })();
 
   // Delete confirmation modal

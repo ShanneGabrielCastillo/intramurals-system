@@ -32,8 +32,7 @@
       {{ match.date_time|date:"M d, Y H:i" }}
     {% endif %}
   </td>
-  <td class="hide-mobile">{{ match.venue }}</td>
-  {% if request.user.profile.role == 'admin' or request.user.profile.role == 'organizer' %}
+  <td>{{ match.venue }}</td>  {% if request.user.is_authenticated and request.user.profile.role == 'admin' or request.user.is_authenticated and request.user.profile.role == 'organizer' %}
   <td>
     <div class="actions-cell">
       <a href="{% url 'match_update' match.pk %}" class="btn-sm-secondary">Edit</a>

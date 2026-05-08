@@ -4,29 +4,89 @@
 
 {% block content %}
 <div class="page-header">
-  <h1>Departments</h1>
+  <div>
+    <h1>Departments</h1>
+    <p style="color:var(--secondary); font-size:0.9rem; margin-top:0.25rem;">Competing colleges and departments.</p>
+  </div>
+  {% if request.user.is_authenticated and request.user.profile.role == 'admin' %}
+    <a href="{% url 'department_create' %}" class="btn-primary">+ Add Department</a>
+  {% endif %}
 </div>
+
+{% if request.user.is_authenticated and request.user.profile.role == 'admin' and group_counts %}
+<div class="dept-group-summary-bar">
+  <span class="dept-group-pill dept-group-a">Group A: {{ group_counts.A }} dept{{ group_counts.A|pluralize }}</span>
+  <span class="dept-group-pill dept-group-b">Group B: {{ group_counts.B }} dept{{ group_counts.B|pluralize }}</span>
+  {% if group_counts.unassigned > 0 %}
+    <span class="dept-group-pill dept-group-none">Unassigned: {{ group_counts.unassigned }}</span>
+  {% endif %}
+  {% if group_counts.imbalanced %}
+    <span class="dept-group-warning">⚠️ Groups are uneven — consider balancing for fair Group Knockout play.</span>
+  {% endif %}
+</div>
+{% endif %}
 
 <div class="table-wrapper">
   <table>
     <thead>
       <tr>
         <th>#</th>
+        <th>Logo</th>
         <th>Department Name</th>
         <th>Abbreviation</th>
+        <th>Group</th>
+        {% if request.user.is_authenticated and request.user.profile.role == 'admin' %}
+          <th>Actions</th>
+        {% endif %}
       </tr>
     </thead>
     <tbody>
       {% for dept in departments %}
       <tr>
-        <td>{{ forloop.counter }}</td>
-        <td>{{ dept.name }}</td>
+        <td>{{ dept.display_order }}</td>
+        <td>
+          {% if dept.logo %}
+            <img src="{{ dept.logo.url }}" alt="{{ dept.abbreviation }}" class="team-logo">
+          {% else %}
+            <div class="team-logo-placeholder">{{ dept.abbreviation|slice:":2" }}</div>
+          {% endif %}
+        </td>
+        <td><strong>{{ dept.name }}</strong></td>
         <td>{{ dept.abbreviation }}</td>
+        <td>
+          {% if dept.group == 'A' %}
+            <span class="dept-group-pill dept-group-a">Group A</span>
+          {% elif dept.group == 'B' %}
+            <span class="dept-group-pill dept-group-b">Group B</span>
+          {% else %}
+            <span style="color:var(--secondary); font-size:0.82rem; font-style:italic;">—</span>
+          {% endif %}
+        </td>
+        {% if request.user.is_authenticated and request.user.profile.role == 'admin' %}
+        <td>
+          <div class="actions-cell">
+            <a href="{% url 'department_update' dept.pk %}" class="btn-sm-secondary">Edit</a>
+            <form method="post" action="{% url 'department_sync' dept.pk %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn-sm-secondary" title="Generate any missing matches for this department in the active season">Sync</button>
+            </form>
+            <form method="post" action="{% url 'department_delete' dept.pk %}" style="display:inline;"
+                  data-confirm-delete="Permanently delete &quot;{{ dept.name }}&quot;? All related current season matches will be removed automatically. This action cannot be undone.">
+              {% csrf_token %}
+              <button type="submit" class="btn-sm-danger">Delete</button>
+            </form>
+          </div>
+        </td>
+        {% endif %}
       </tr>
       {% empty %}
       <tr>
-        <td colspan="3">
-          <div class="empty-state">No departments found.</div>
+        <td colspan="{% if request.user.is_authenticated and request.user.profile.role == 'admin' %}6{% else %}5{% endif %}">
+          <div class="empty-state">No departments found.
+            {% if request.user.is_authenticated and request.user.profile.role == 'admin' %}
+              <a href="{% url 'department_create' %}">Add the first one.</a>
+            {% endif %}
+          </div>
         </td>
       </tr>
       {% endfor %}

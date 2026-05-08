@@ -1,0 +1,562 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intramurals Management System — Complete System Flowchart</title>
+<style>
+  body { margin: 0; padding: 20px; background: #f3f4f6; font-family: 'Segoe UI', Arial, sans-serif; }
+  h1 { text-align: center; color: #1e1b4b; font-size: 20px; margin-bottom: 16px; }
+  .svg-container { background: white; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.12); overflow: auto; max-width: 1100px; margin: 0 auto; padding: 10px; }
+  svg text { font-family: 'Segoe UI', Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Intramurals Management System — Complete System Flowchart</h1>
+<div class="svg-container">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 4200" width="1000" height="4200">
+  <defs>
+    <!-- Arrow marker -->
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4b5563"/>
+    </marker>
+    <!-- Purple gradient for terminals -->
+    <linearGradient id="termGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6c5ce7;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#a29bfe;stop-opacity:1"/>
+    </linearGradient>
+    <!-- Grid pattern -->
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#e5e7eb" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="4200" fill="#ffffff"/>
+  <rect width="1000" height="4200" fill="url(#grid)"/>
+
+  <!-- Title bar -->
+  <rect x="0" y="0" width="1000" height="36" fill="#1e1b4b" rx="0"/>
+  <text x="500" y="23" text-anchor="middle" fill="white" font-size="14" font-weight="700">Intramurals Management System — Complete System Flowchart</text>
+
+  <!-- ============================================================ -->
+  <!-- NODES -->
+  <!-- ============================================================ -->
+
+  <!-- T1: START terminal y=60 x=500 -->
+  <rect x="420" y="44" width="160" height="32" rx="16" fill="url(#termGrad)"/>
+  <text x="500" y="65" text-anchor="middle" fill="white" font-size="13" font-weight="700">START</text>
+
+  <!-- P1: Open Website y=150 x=500 -->
+  <rect x="360" y="132" width="280" height="36" rx="8" fill="#2563eb"/>
+  <text x="500" y="155" text-anchor="middle" fill="white" font-size="12" font-weight="700">Open Website / System Loads</text>
+
+  <!-- D1: Login? y=260 x=500 -->
+  <polygon points="500,230 580,260 500,290 420,260" fill="#059669"/>
+  <text x="500" y="264" text-anchor="middle" fill="white" font-size="12" font-weight="700">Login?</text>
+
+  <!-- P2: Viewer Mode y=370 x=160 -->
+  <rect x="60" y="352" width="200" height="36" rx="8" fill="#2563eb"/>
+  <text x="160" y="375" text-anchor="middle" fill="white" font-size="12" font-weight="700">Viewer Mode (No Login)</text>
+
+  <!-- D2: Admin or Organizer? y=370 x=500 -->
+  <polygon points="500,340 600,370 500,400 400,370" fill="#059669"/>
+  <text x="500" y="367" text-anchor="middle" fill="white" font-size="11" font-weight="700">Admin or</text>
+  <text x="500" y="381" text-anchor="middle" fill="white" font-size="11" font-weight="700">Organizer?</text>
+
+  <!-- P3: Viewer Pages y=480 x=160 -->
+  <rect x="40" y="456" width="240" height="52" rx="8" fill="#2563eb"/>
+  <text x="160" y="474" text-anchor="middle" fill="white" font-size="11" font-weight="700">Viewer Pages:</text>
+  <text x="160" y="488" text-anchor="middle" fill="white" font-size="10">Events, Schedule, Results,</text>
+  <text x="160" y="501" text-anchor="middle" fill="white" font-size="10">Standings, Leaderboard, Notifications</text>
+
+  <!-- P4: Admin Dashboard y=480 x=350 -->
+  <rect x="265" y="462" width="170" height="36" rx="8" fill="#2563eb"/>
+  <text x="350" y="485" text-anchor="middle" fill="white" font-size="12" font-weight="700">Admin Dashboard</text>
+
+  <!-- P5: Organizer Login y=480 x=700 -->
+  <rect x="590" y="456" width="220" height="52" rx="8" fill="#2563eb"/>
+  <text x="700" y="474" text-anchor="middle" fill="white" font-size="11" font-weight="700">Organizer Login</text>
+  <text x="700" y="488" text-anchor="middle" fill="white" font-size="10">Assigned Events Only</text>
+  <text x="700" y="501" text-anchor="middle" fill="white" font-size="10">(Filtered by Event+Category+Division)</text>
+
+  <!-- P6: Season Management y=600 x=350 -->
+  <rect x="215" y="578" width="270" height="44" rx="8" fill="#0284c7"/>
+  <text x="350" y="596" text-anchor="middle" fill="white" font-size="11" font-weight="700">Season Management:</text>
+  <text x="350" y="610" text-anchor="middle" fill="white" font-size="10">Create/Edit/Delete Seasons,</text>
+  <text x="350" y="622" text-anchor="middle" fill="white" font-size="10">Copy Previous Season Events</text>
+
+  <!-- P7: View Assigned Matches y=600 x=700 -->
+  <rect x="580" y="578" width="240" height="44" rx="8" fill="#0284c7"/>
+  <text x="700" y="596" text-anchor="middle" fill="white" font-size="11" font-weight="700">View Assigned Matches Only</text>
+  <text x="700" y="610" text-anchor="middle" fill="white" font-size="10">(Filtered by Event + Category</text>
+  <text x="700" y="622" text-anchor="middle" fill="white" font-size="10">+ Division)</text>
+
+  <!-- D3: Create New Season? y=720 x=350 -->
+  <polygon points="350,690 440,720 350,750 260,720" fill="#059669"/>
+  <text x="350" y="716" text-anchor="middle" fill="white" font-size="11" font-weight="700">Create New</text>
+  <text x="350" y="730" text-anchor="middle" fill="white" font-size="11" font-weight="700">Season?</text>
+
+  <!-- D4: Score Entry? y=720 x=700 -->
+  <polygon points="700,690 790,720 700,750 610,720" fill="#059669"/>
+  <text x="700" y="716" text-anchor="middle" fill="white" font-size="11" font-weight="700">Score</text>
+  <text x="700" y="730" text-anchor="middle" fill="white" font-size="11" font-weight="700">Entry?</text>
+
+  <!-- P8: Copy Events y=840 x=200 -->
+  <rect x="90" y="820" width="220" height="36" rx="8" fill="#0284c7"/>
+  <text x="200" y="838" text-anchor="middle" fill="white" font-size="11" font-weight="700">Copy Events from</text>
+  <text x="200" y="852" text-anchor="middle" fill="white" font-size="11" font-weight="700">Previous Season</text>
+
+  <!-- P9: Blank Season y=840 x=500 -->
+  <rect x="380" y="820" width="240" height="36" rx="8" fill="#0284c7"/>
+  <text x="500" y="838" text-anchor="middle" fill="white" font-size="11" font-weight="700">Blank Season —</text>
+  <text x="500" y="852" text-anchor="middle" fill="white" font-size="11" font-weight="700">Add Events Manually</text>
+
+  <!-- P10: Enter Match Score y=840 x=700 -->
+  <rect x="580" y="820" width="240" height="36" rx="8" fill="#0284c7"/>
+  <text x="700" y="838" text-anchor="middle" fill="white" font-size="11" font-weight="700">Enter Match Score</text>
+  <text x="700" y="852" text-anchor="middle" fill="white" font-size="11" font-weight="700">(Normal or Set-Based)</text>
+
+  <!-- P11: Events Auto-Generated y=960 x=350 -->
+  <rect x="215" y="940" width="270" height="36" rx="8" fill="#0284c7"/>
+  <text x="350" y="958" text-anchor="middle" fill="white" font-size="11" font-weight="700">Events Auto-Generated</text>
+  <text x="350" y="972" text-anchor="middle" fill="white" font-size="11" font-weight="700">with Matches</text>
+
+  <!-- D5: Stage Locked? y=960 x=700 -->
+  <polygon points="700,930 790,960 700,990 610,960" fill="#059669"/>
+  <text x="700" y="956" text-anchor="middle" fill="white" font-size="11" font-weight="700">Stage</text>
+  <text x="700" y="970" text-anchor="middle" fill="white" font-size="11" font-weight="700">Locked?</text>
+
+  <!-- D6: Create Event? y=1080 x=350 -->
+  <polygon points="350,1050 440,1080 350,1110 260,1080" fill="#059669"/>
+  <text x="350" y="1076" text-anchor="middle" fill="white" font-size="11" font-weight="700">Create</text>
+  <text x="350" y="1090" text-anchor="middle" fill="white" font-size="11" font-weight="700">Event?</text>
+
+  <!-- P12: Edit Blocked y=1080 x=900 -->
+  <rect x="820" y="1062" width="160" height="36" rx="8" fill="#dc2626"/>
+  <text x="900" y="1078" text-anchor="middle" fill="white" font-size="10" font-weight="700">🔒 Edit Blocked —</text>
+  <text x="900" y="1092" text-anchor="middle" fill="white" font-size="10">Next Stage Already Generated</text>
+
+  <!-- P13: Score Saved y=1080 x=700 -->
+  <rect x="590" y="1062" width="220" height="36" rx="8" fill="#0284c7"/>
+  <text x="700" y="1080" text-anchor="middle" fill="white" font-size="11" font-weight="700">Score Saved</text>
+  <text x="700" y="1094" text-anchor="middle" fill="white" font-size="11" font-weight="700">to Database</text>
+
+  <!-- P14: Choose Format y=1200 x=200 -->
+  <rect x="80" y="1180" width="240" height="36" rx="8" fill="#0284c7"/>
+  <text x="200" y="1198" text-anchor="middle" fill="white" font-size="11" font-weight="700">Choose Format:</text>
+  <text x="200" y="1212" text-anchor="middle" fill="white" font-size="11" font-weight="700">Hybrid or Group Knockout</text>
+
+  <!-- P15: Choose Divisions y=1200 x=500 -->
+  <rect x="370" y="1180" width="260" height="36" rx="8" fill="#0284c7"/>
+  <text x="500" y="1198" text-anchor="middle" fill="white" font-size="11" font-weight="700">Choose Divisions:</text>
+  <text x="500" y="1212" text-anchor="middle" fill="white" font-size="11" font-weight="700">Men / Women / Both</text>
+
+  <!-- P16: post_save Signal y=1200 x=700 -->
+  <rect x="580" y="1180" width="240" height="36" rx="8" fill="#0284c7"/>
+  <text x="700" y="1198" text-anchor="middle" fill="white" font-size="11" font-weight="700">post_save Signal Fires →</text>
+  <text x="700" y="1212" text-anchor="middle" fill="white" font-size="11" font-weight="700">Standings Updated</text>
+
+  <!-- P17: Choose Categories y=1320 x=350 -->
+  <rect x="185" y="1300" width="330" height="36" rx="8" fill="#0284c7"/>
+  <text x="350" y="1318" text-anchor="middle" fill="white" font-size="11" font-weight="700">Choose Categories (Optional):</text>
+  <text x="350" y="1332" text-anchor="middle" fill="white" font-size="11" font-weight="700">Singles, Doubles, Mixed</text>
+
+  <!-- P18: check_and_advance_stage y=1320 x=700 -->
+  <rect x="570" y="1300" width="260" height="36" rx="8" fill="#0284c7"/>
+  <text x="700" y="1318" text-anchor="middle" fill="white" font-size="11" font-weight="700">check_and_advance_stage()</text>
+  <text x="700" y="1332" text-anchor="middle" fill="white" font-size="11" font-weight="700">Called</text>
+
+  <!-- P19: Matches Auto-Generated y=1440 x=350 -->
+  <rect x="185" y="1420" width="330" height="36" rx="8" fill="#0284c7"/>
+  <text x="350" y="1438" text-anchor="middle" fill="white" font-size="11" font-weight="700">Matches Auto-Generated</text>
+  <text x="350" y="1452" text-anchor="middle" fill="white" font-size="11" font-weight="700">on Event Save</text>
+
+  <!-- D7: Stage Complete? y=1440 x=700 -->
+  <polygon points="700,1410 790,1440 700,1470 610,1440" fill="#059669"/>
+  <text x="700" y="1436" text-anchor="middle" fill="white" font-size="11" font-weight="700">Stage</text>
+  <text x="700" y="1450" text-anchor="middle" fill="white" font-size="11" font-weight="700">Complete?</text>
+
+  <!-- D8: Format? y=1560 x=350 -->
+  <polygon points="350,1530 440,1560 350,1590 260,1560" fill="#059669"/>
+  <text x="350" y="1556" text-anchor="middle" fill="white" font-size="11" font-weight="700">Format?</text>
+
+  <!-- P20: Generate Next Stage y=1560 x=700 -->
+  <rect x="580" y="1542" width="240" height="36" rx="8" fill="#0284c7"/>
+  <text x="700" y="1560" text-anchor="middle" fill="white" font-size="11" font-weight="700">Generate Next</text>
+  <text x="700" y="1574" text-anchor="middle" fill="white" font-size="11" font-weight="700">Stage Matches</text>
+
+  <!-- P21: Wait for More Scores y=1560 x=900 -->
+  <rect x="830" y="1542" width="150" height="36" rx="8" fill="#6b7280"/>
+  <text x="905" y="1560" text-anchor="middle" fill="white" font-size="11" font-weight="700">Wait for</text>
+  <text x="905" y="1574" text-anchor="middle" fill="white" font-size="11" font-weight="700">More Scores</text>
+
+  <!-- P22: HYBRID y=1680 x=160 -->
+  <rect x="30" y="1658" width="260" height="44" rx="8" fill="#7c3aed"/>
+  <text x="160" y="1676" text-anchor="middle" fill="white" font-size="11" font-weight="700">HYBRID:</text>
+  <text x="160" y="1690" text-anchor="middle" fill="white" font-size="10">Round Robin Matches Generated</text>
+  <text x="160" y="1703" text-anchor="middle" fill="white" font-size="10">(All vs All)</text>
+
+  <!-- P23: GROUP KNOCKOUT y=1680 x=560 -->
+  <rect x="390" y="1658" width="340" height="44" rx="8" fill="#7c3aed"/>
+  <text x="560" y="1676" text-anchor="middle" fill="white" font-size="11" font-weight="700">GROUP KNOCKOUT:</text>
+  <text x="560" y="1690" text-anchor="middle" fill="white" font-size="10">Group A + Group B Matches Generated</text>
+  <text x="560" y="1703" text-anchor="middle" fill="white" font-size="10">(Separate Group Stages)</text>
+
+  <!-- P24: Round Robin Standings y=1800 x=160 -->
+  <rect x="20" y="1778" width="280" height="44" rx="8" fill="#0284c7"/>
+  <text x="160" y="1796" text-anchor="middle" fill="white" font-size="11" font-weight="700">Round Robin Standings Calculated</text>
+  <text x="160" y="1810" text-anchor="middle" fill="white" font-size="10">Win=3pts, Draw=1pt, Loss=0pts</text>
+  <text x="160" y="1823" text-anchor="middle" fill="white" font-size="10">(Per Division)</text>
+
+  <!-- P25: Group Standings y=1800 x=560 -->
+  <rect x="380" y="1778" width="360" height="44" rx="8" fill="#0284c7"/>
+  <text x="560" y="1796" text-anchor="middle" fill="white" font-size="11" font-weight="700">Group A Standings +</text>
+  <text x="560" y="1810" text-anchor="middle" fill="white" font-size="10">Group B Standings Calculated</text>
+  <text x="560" y="1823" text-anchor="middle" fill="white" font-size="10">(Win=3, Draw=1, Loss=0)</text>
+
+  <!-- P26: Top 4 Advance y=1920 x=160 -->
+  <rect x="10" y="1898" width="300" height="44" rx="8" fill="#0284c7"/>
+  <text x="160" y="1916" text-anchor="middle" fill="white" font-size="11" font-weight="700">Top 4 Teams Advance:</text>
+  <text x="160" y="1930" text-anchor="middle" fill="white" font-size="10">SF1=Rank1 vs Rank4</text>
+  <text x="160" y="1943" text-anchor="middle" fill="white" font-size="10">SF2=Rank2 vs Rank3</text>
+
+  <!-- P27: Top 2 from Each Group y=1920 x=560 -->
+  <rect x="370" y="1898" width="380" height="44" rx="8" fill="#0284c7"/>
+  <text x="560" y="1916" text-anchor="middle" fill="white" font-size="11" font-weight="700">Top 2 from Each Group Advance:</text>
+  <text x="560" y="1930" text-anchor="middle" fill="white" font-size="10">SF1=A1 vs B2</text>
+  <text x="560" y="1943" text-anchor="middle" fill="white" font-size="10">SF2=B1 vs A2</text>
+
+  <!-- P28: Semifinal Matches Generated y=2040 x=360 -->
+  <rect x="130" y="2018" width="460" height="44" rx="8" fill="#2563eb"/>
+  <text x="360" y="2036" text-anchor="middle" fill="white" font-size="12" font-weight="700">Semifinal Matches Generated</text>
+  <text x="360" y="2052" text-anchor="middle" fill="white" font-size="11">(Both Formats Merge Here)</text>
+
+  <!-- P29: Semifinal Scores y=2160 x=360 -->
+  <rect x="220" y="2140" width="280" height="36" rx="8" fill="#0284c7"/>
+  <text x="360" y="2158" text-anchor="middle" fill="white" font-size="12" font-weight="700">Semifinal Scores Entered</text>
+
+  <!-- P30: Finals + 3rd Place y=2280 x=360 -->
+  <rect x="100" y="2258" width="520" height="44" rx="8" fill="#0284c7"/>
+  <text x="360" y="2276" text-anchor="middle" fill="white" font-size="12" font-weight="700">Finals + 3rd Place Match Generated</text>
+  <text x="360" y="2292" text-anchor="middle" fill="white" font-size="11">(Winners→Final, Losers→3rd Place)</text>
+
+  <!-- P31: Final Match Scored y=2400 x=360 -->
+  <rect x="220" y="2382" width="280" height="36" rx="8" fill="#0284c7"/>
+  <text x="360" y="2400" text-anchor="middle" fill="white" font-size="12" font-weight="700">Final Match Scored</text>
+
+  <!-- D9: Match Stage? y=2520 x=360 -->
+  <polygon points="360,2490 460,2520 360,2550 260,2520" fill="#059669"/>
+  <text x="360" y="2516" text-anchor="middle" fill="white" font-size="11" font-weight="700">Match</text>
+  <text x="360" y="2530" text-anchor="middle" fill="white" font-size="11" font-weight="700">Stage?</text>
+
+  <!-- P32: Gold/Silver y=2640 x=200 -->
+  <rect x="60" y="2620" width="280" height="36" rx="8" fill="#d97706"/>
+  <text x="200" y="2638" text-anchor="middle" fill="white" font-size="12" font-weight="700">Winner → 🥇 Gold</text>
+  <text x="200" y="2652" text-anchor="middle" fill="white" font-size="12" font-weight="700">Loser → 🥈 Silver</text>
+
+  <!-- P33: Bronze y=2640 x=560 -->
+  <rect x="420" y="2620" width="280" height="36" rx="8" fill="#d97706"/>
+  <text x="560" y="2638" text-anchor="middle" fill="white" font-size="12" font-weight="700">Winner → 🥉 Bronze</text>
+
+  <!-- P34: EventResult Records y=2760 x=360 -->
+  <rect x="180" y="2740" width="360" height="36" rx="8" fill="#0284c7"/>
+  <text x="360" y="2758" text-anchor="middle" fill="white" font-size="12" font-weight="700">EventResult Records Saved</text>
+  <text x="360" y="2772" text-anchor="middle" fill="white" font-size="11">to Database</text>
+
+  <!-- P35: Leaderboard Updated y=2880 x=360 -->
+  <rect x="100" y="2858" width="520" height="36" rx="8" fill="#0284c7"/>
+  <text x="360" y="2876" text-anchor="middle" fill="white" font-size="12" font-weight="700">Overall Leaderboard Updated:</text>
+  <text x="360" y="2890" text-anchor="middle" fill="white" font-size="11">Gold=5pts, Silver=3pts, Bronze=1pt</text>
+
+  <!-- P36: Departments Ranked y=3000 x=360 -->
+  <rect x="100" y="2978" width="520" height="36" rx="8" fill="#0284c7"/>
+  <text x="360" y="2996" text-anchor="middle" fill="white" font-size="12" font-weight="700">Departments Ranked by Total Points</text>
+  <text x="360" y="3010" text-anchor="middle" fill="white" font-size="11">→ Gold Count → Silver Count</text>
+
+  <!-- P37: General Champion y=3120 x=360 -->
+  <rect x="160" y="3098" width="400" height="36" rx="8" fill="#7c3aed"/>
+  <text x="360" y="3116" text-anchor="middle" fill="white" font-size="13" font-weight="700">🏆 General Champion</text>
+  <text x="360" y="3130" text-anchor="middle" fill="white" font-size="11">= Rank 1 Department</text>
+
+  <!-- P38: Notification Broadcast y=3240 x=360 -->
+  <rect x="100" y="3218" width="520" height="36" rx="8" fill="#0284c7"/>
+  <text x="360" y="3236" text-anchor="middle" fill="white" font-size="12" font-weight="700">Real-Time Notification Broadcast</text>
+  <text x="360" y="3250" text-anchor="middle" fill="white" font-size="11">(AJAX polling every 5s)</text>
+
+  <!-- P39: Toast Notification y=3360 x=360 -->
+  <rect x="80" y="3338" width="560" height="36" rx="8" fill="#0284c7"/>
+  <text x="360" y="3356" text-anchor="middle" fill="white" font-size="12" font-weight="700">Toast Notification Visible to All Users</text>
+  <text x="360" y="3370" text-anchor="middle" fill="white" font-size="11">(Viewers, Organizers, Admins)</text>
+
+  <!-- D10: Season Complete? y=3480 x=360 -->
+  <polygon points="360,3450 460,3480 360,3510 260,3480" fill="#059669"/>
+  <text x="360" y="3476" text-anchor="middle" fill="white" font-size="11" font-weight="700">Season</text>
+  <text x="360" y="3490" text-anchor="middle" fill="white" font-size="11" font-weight="700">Complete?</text>
+
+  <!-- P40: Continue Adding y=3600 x=160 -->
+  <rect x="50" y="3580" width="220" height="36" rx="8" fill="#0284c7"/>
+  <text x="160" y="3598" text-anchor="middle" fill="white" font-size="11" font-weight="700">Continue Adding</text>
+  <text x="160" y="3612" text-anchor="middle" fill="white" font-size="11" font-weight="700">Events/Matches</text>
+
+  <!-- P41: Season Archived y=3600 x=560 -->
+  <rect x="400" y="3580" width="320" height="36" rx="8" fill="#0284c7"/>
+  <text x="560" y="3598" text-anchor="middle" fill="white" font-size="12" font-weight="700">Season Archived —</text>
+  <text x="560" y="3612" text-anchor="middle" fill="white" font-size="11">Historical Records Preserved</text>
+
+  <!-- P42: Past Season Read-Only y=3720 x=560 -->
+  <rect x="380" y="3700" width="360" height="36" rx="8" fill="#0284c7"/>
+  <text x="560" y="3718" text-anchor="middle" fill="white" font-size="12" font-weight="700">Past Season Read-Only —</text>
+  <text x="560" y="3732" text-anchor="middle" fill="white" font-size="11">Accessible via Season Selector</text>
+
+  <!-- T2: END terminal y=3840 x=500 -->
+  <rect x="420" y="3824" width="160" height="32" rx="16" fill="url(#termGrad)"/>
+  <text x="500" y="3845" text-anchor="middle" fill="white" font-size="13" font-weight="700">END</text>
+
+  <!-- ============================================================ -->
+  <!-- CONNECTIONS / ARROWS -->
+  <!-- ============================================================ -->
+
+  <!-- T1 → P1 (down) -->
+  <line x1="500" y1="76" x2="500" y2="132" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P1 → D1 (down) -->
+  <line x1="500" y1="168" x2="500" y2="230" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- D1 → P2 (left, label "No") -->
+  <line x1="420" y1="260" x2="260" y2="260" stroke="#4b5563" stroke-width="2"/>
+  <line x1="260" y1="260" x2="260" y2="352" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="390" y="253" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">No</text>
+
+  <!-- D1 → D2 (down, label "Yes") -->
+  <line x1="500" y1="290" x2="500" y2="340" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="512" y="320" fill="#374151" font-size="11" font-style="italic">Yes</text>
+
+  <!-- P2 → P3 (down) -->
+  <line x1="160" y1="388" x2="160" y2="456" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- D2 → P4 (left, label "Admin") -->
+  <line x1="400" y1="370" x2="350" y2="370" stroke="#4b5563" stroke-width="2"/>
+  <line x1="350" y1="370" x2="350" y2="462" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="375" y="363" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">Admin</text>
+
+  <!-- D2 → P5 (right, label "Organizer") -->
+  <line x1="600" y1="370" x2="700" y2="370" stroke="#4b5563" stroke-width="2"/>
+  <line x1="700" y1="370" x2="700" y2="456" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="650" y="363" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">Organizer</text>
+
+  <!-- P4 → P6 (down) -->
+  <line x1="350" y1="498" x2="350" y2="578" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P5 → P7 (down) -->
+  <line x1="700" y1="508" x2="700" y2="578" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P6 → D3 (down) -->
+  <line x1="350" y1="622" x2="350" y2="690" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P7 → D4 (down) -->
+  <line x1="700" y1="622" x2="700" y2="690" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- D3 → P8 (left, label "Yes") -->
+  <line x1="260" y1="720" x2="200" y2="720" stroke="#4b5563" stroke-width="2"/>
+  <line x1="200" y1="720" x2="200" y2="820" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="230" y="713" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">Yes</text>
+
+  <!-- D3 → P9 (right, label "No") -->
+  <line x1="440" y1="720" x2="500" y2="720" stroke="#4b5563" stroke-width="2"/>
+  <line x1="500" y1="720" x2="500" y2="820" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="470" y="713" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">No</text>
+
+  <!-- D4 → P10 (down, label "Yes") -->
+  <line x1="700" y1="750" x2="700" y2="820" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="712" y="790" fill="#374151" font-size="11" font-style="italic">Yes</text>
+
+  <!-- D4 → P12 (right, label "Locked") — goes right to P12 at y=1080 -->
+  <line x1="790" y1="720" x2="960" y2="720" stroke="#4b5563" stroke-width="2"/>
+  <line x1="960" y1="720" x2="960" y2="1062" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="875" y="713" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">Locked</text>
+
+  <!-- P8 → P11 (down-right merge) -->
+  <line x1="200" y1="856" x2="200" y2="960" stroke="#4b5563" stroke-width="2"/>
+  <line x1="200" y1="960" x2="215" y2="960" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P9 → P11 (down-left merge) -->
+  <line x1="500" y1="856" x2="500" y2="960" stroke="#4b5563" stroke-width="2"/>
+  <line x1="500" y1="960" x2="485" y2="960" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P10 → D5 (down) -->
+  <line x1="700" y1="856" x2="700" y2="930" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- D5 → P12 (right, label "Yes") -->
+  <line x1="790" y1="960" x2="820" y2="960" stroke="#4b5563" stroke-width="2"/>
+  <line x1="820" y1="960" x2="820" y2="1062" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="805" y="953" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">Yes</text>
+
+  <!-- D5 → P13 (down, label "No") -->
+  <line x1="700" y1="990" x2="700" y2="1062" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="712" y="1030" fill="#374151" font-size="11" font-style="italic">No</text>
+
+  <!-- P11 → D6 (down) -->
+  <line x1="350" y1="976" x2="350" y2="1050" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- D6 → P14 (left, label "Yes") -->
+  <line x1="260" y1="1080" x2="200" y2="1080" stroke="#4b5563" stroke-width="2"/>
+  <line x1="200" y1="1080" x2="200" y2="1180" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="230" y="1073" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">Yes</text>
+
+  <!-- P13 → P16 (down) -->
+  <line x1="700" y1="1098" x2="700" y2="1180" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P14 → P15 (right) -->
+  <line x1="320" y1="1198" x2="370" y2="1198" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P15 → P17 (down) -->
+  <line x1="500" y1="1216" x2="500" y2="1260" stroke="#4b5563" stroke-width="2"/>
+  <line x1="500" y1="1260" x2="350" y2="1260" stroke="#4b5563" stroke-width="2"/>
+  <line x1="350" y1="1260" x2="350" y2="1300" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P16 → P18 (down) -->
+  <line x1="700" y1="1216" x2="700" y2="1300" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P17 → P19 (down) -->
+  <line x1="350" y1="1336" x2="350" y2="1420" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P18 → D7 (down) -->
+  <line x1="700" y1="1336" x2="700" y2="1410" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P19 → D8 (down) -->
+  <line x1="350" y1="1456" x2="350" y2="1530" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- D7 → P20 (down, label "Yes") -->
+  <line x1="700" y1="1470" x2="700" y2="1542" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="712" y="1510" fill="#374151" font-size="11" font-style="italic">Yes</text>
+
+  <!-- D7 → P21 (right, label "No") -->
+  <line x1="790" y1="1440" x2="830" y2="1440" stroke="#4b5563" stroke-width="2"/>
+  <line x1="830" y1="1440" x2="830" y2="1542" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="810" y="1433" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">No</text>
+
+  <!-- D8 → P22 (left, label "Hybrid") -->
+  <line x1="260" y1="1560" x2="160" y2="1560" stroke="#4b5563" stroke-width="2"/>
+  <line x1="160" y1="1560" x2="160" y2="1658" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="210" y="1553" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">Hybrid</text>
+
+  <!-- D8 → P23 (right, label "Group KO") -->
+  <line x1="440" y1="1560" x2="560" y2="1560" stroke="#4b5563" stroke-width="2"/>
+  <line x1="560" y1="1560" x2="560" y2="1658" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="500" y="1553" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">Group KO</text>
+
+  <!-- P22 → P24 (down) -->
+  <line x1="160" y1="1702" x2="160" y2="1778" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P23 → P25 (down) -->
+  <line x1="560" y1="1702" x2="560" y2="1778" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P24 → P26 (down) -->
+  <line x1="160" y1="1822" x2="160" y2="1898" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P25 → P27 (down) -->
+  <line x1="560" y1="1822" x2="560" y2="1898" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P26 → P28 (down-right merge) -->
+  <line x1="160" y1="1942" x2="160" y2="2040" stroke="#4b5563" stroke-width="2"/>
+  <line x1="160" y1="2040" x2="130" y2="2040" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P27 → P28 (down-left merge) -->
+  <line x1="560" y1="1942" x2="560" y2="2040" stroke="#4b5563" stroke-width="2"/>
+  <line x1="560" y1="2040" x2="590" y2="2040" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P20 → P28 (connects into semifinal flow — down then left) -->
+  <line x1="700" y1="1578" x2="700" y2="2040" stroke="#4b5563" stroke-width="2" stroke-dasharray="5,3"/>
+  <line x1="700" y1="2040" x2="590" y2="2040" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P28 → P29 (down) -->
+  <line x1="360" y1="2062" x2="360" y2="2140" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P29 → P30 (down) -->
+  <line x1="360" y1="2176" x2="360" y2="2258" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P30 → P31 (down) -->
+  <line x1="360" y1="2302" x2="360" y2="2382" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P31 → D9 (down) -->
+  <line x1="360" y1="2418" x2="360" y2="2490" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- D9 → P32 (left, label "Final") -->
+  <line x1="260" y1="2520" x2="200" y2="2520" stroke="#4b5563" stroke-width="2"/>
+  <line x1="200" y1="2520" x2="200" y2="2620" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="230" y="2513" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">Final</text>
+
+  <!-- D9 → P33 (right, label "3rd Place") -->
+  <line x1="460" y1="2520" x2="560" y2="2520" stroke="#4b5563" stroke-width="2"/>
+  <line x1="560" y1="2520" x2="560" y2="2620" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="510" y="2513" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">3rd Place</text>
+
+  <!-- P32 → P34 (down-right merge) -->
+  <line x1="200" y1="2656" x2="200" y2="2758" stroke="#4b5563" stroke-width="2"/>
+  <line x1="200" y1="2758" x2="180" y2="2758" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P33 → P34 (down-left merge) -->
+  <line x1="560" y1="2656" x2="560" y2="2758" stroke="#4b5563" stroke-width="2"/>
+  <line x1="560" y1="2758" x2="540" y2="2758" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P34 → P35 (down) -->
+  <line x1="360" y1="2776" x2="360" y2="2858" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P35 → P36 (down) -->
+  <line x1="360" y1="2894" x2="360" y2="2978" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P36 → P37 (down) -->
+  <line x1="360" y1="3014" x2="360" y2="3098" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P37 → P38 (down) -->
+  <line x1="360" y1="3134" x2="360" y2="3218" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P38 → P39 (down) -->
+  <line x1="360" y1="3254" x2="360" y2="3338" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P39 → D10 (down) -->
+  <line x1="360" y1="3374" x2="360" y2="3450" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- D10 → P40 (left, label "No") -->
+  <line x1="260" y1="3480" x2="160" y2="3480" stroke="#4b5563" stroke-width="2"/>
+  <line x1="160" y1="3480" x2="160" y2="3580" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="210" y="3473" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">No</text>
+
+  <!-- D10 → P41 (right, label "Yes") -->
+  <line x1="460" y1="3480" x2="560" y2="3480" stroke="#4b5563" stroke-width="2"/>
+  <line x1="560" y1="3480" x2="560" y2="3580" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="510" y="3473" text-anchor="middle" fill="#374151" font-size="11" font-style="italic">Yes</text>
+
+  <!-- P40 → P11 (loop back up — left-side return arrow) -->
+  <line x1="50" y1="3598" x2="30" y2="3598" stroke="#4b5563" stroke-width="2" stroke-dasharray="6,3"/>
+  <line x1="30" y1="3598" x2="30" y2="958" stroke="#4b5563" stroke-width="2" stroke-dasharray="6,3"/>
+  <line x1="30" y1="958" x2="215" y2="958" stroke="#4b5563" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrow)"/>
+  <text x="18" y="2280" fill="#374151" font-size="10" font-style="italic" transform="rotate(-90,18,2280)">Loop Back</text>
+
+  <!-- P41 → P42 (down) -->
+  <line x1="560" y1="3616" x2="560" y2="3700" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P42 → T2 (down) -->
+  <line x1="560" y1="3736" x2="560" y2="3856" stroke="#4b5563" stroke-width="2"/>
+  <line x1="560" y1="3856" x2="580" y2="3856" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- P3 → T2 (long arrow down — viewer path ends) -->
+  <line x1="160" y1="508" x2="160" y2="3856" stroke="#4b5563" stroke-width="1.5" stroke-dasharray="8,4"/>
+  <line x1="160" y1="3856" x2="420" y2="3856" stroke="#4b5563" stroke-width="1.5" stroke-dasharray="8,4" marker-end="url(#arrow)"/>
+  <text x="148" y="2200" fill="#374151" font-size="10" font-style="italic" transform="rotate(-90,148,2200)">Viewer Path → END</text>
+
+</svg>
+</div>
+<div style="text-align:center; margin-top:16px; color:#6b7280; font-size:12px;">
+  <strong>Legend:</strong>
+  &nbsp;
+  <svg width="14" height="14" style="vertical-align:middle"><rect width="14" height="14" rx="7" fill="url(#termGrad)"/></svg> Terminal &nbsp;
+  <svg width="14" height="14" style="vertical-align:middle"><rect width="14" height="14" rx="3" fill="#2563eb"/></svg> Process &nbsp;
+  <svg width="14" height="14" style="vertical-align:middle"><rect width="14" height="14" rx="3" fill="#0284c7"/></svg> Sub-Process &nbsp;
+  <svg width="14" height="14" style="vertical-align:middle"><polygon points="7,0 14,7 7,14 0,7" fill="#059669"/></svg> Decision &nbsp;
+  <svg width="14" height="14" style="vertical-align:middle"><rect width="14" height="14" rx="3" fill="#7c3aed"/></svg> Format Branch &nbsp;
+  <svg width="14" height="14" style="vertical-align:middle"><rect width="14" height="14" rx="3" fill="#d97706"/></svg> Medal Award
+</div>
+</body>
+</html>
